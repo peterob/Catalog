@@ -1,44 +1,709 @@
 [
   {
-    "file": "demos/cash-flow-waterfall.html",
-    "title": "Cash Flow Waterfall",
+    "file": "demos/CAST_CFO_Dashboard (3).html",
+    "title": "CAST CFO Dashboard",
     "type": "dashboard",
-    "domain": "finance",
-    "description": "Interactive waterfall chart showing cash flow sources and uses"
+    "domain": "cast",
+    "description": "CFO-focused CAST dashboard view"
   },
   {
-    "file": "demos/event-sourced-ledger.html",
-    "title": "Event-Sourced Ledger",
+    "file": "demos/CAST_Dental_Dashboard (2).html",
+    "title": "CAST Dental Dashboard",
+    "type": "dashboard",
+    "domain": "cast",
+    "description": "CAST dashboard for dental vertical"
+  },
+  {
+    "file": "demos/CAST_Enterprise_SaaS_Dashboard.html",
+    "title": "CAST Enterprise SaaS Dashboard",
+    "type": "dashboard",
+    "domain": "cast",
+    "description": "CAST dashboard for enterprise SaaS"
+  },
+  {
+    "file": "demos/CAST_Enterprise_SaaS_Dashboard_UW.html",
+    "title": "CAST Enterprise SaaS (Underwriting)",
+    "type": "dashboard",
+    "domain": "cast",
+    "description": "CAST SaaS dashboard — underwriting view"
+  },
+  {
+    "file": "demos/CAST_HOA_Dashboard (1).html",
+    "title": "CAST HOA Dashboard",
+    "type": "dashboard",
+    "domain": "cast",
+    "description": "CAST dashboard for HOA governance"
+  },
+  {
+    "file": "demos/CAST_RBF_Dashboard (2).html",
+    "title": "CAST Revenue-Based Finance Dashboard",
+    "type": "dashboard",
+    "domain": "cast",
+    "description": "CAST dashboard for revenue-based financing"
+  },
+  {
+    "file": "demos/CGPT Use Case.html",
+    "title": "ChatGPT Use Case",
     "type": "prototype",
-    "domain": "cast",
-    "description": "Demo of deterministic ledger with cryptographic proofs"
+    "domain": "ai-compare",
+    "description": "Use case demo generated with ChatGPT"
   },
   {
-    "file": "demos/capital-allocation-matrix.html",
-    "title": "Capital Allocation Matrix",
-    "type": "methodology",
-    "domain": "finance",
-    "description": "Framework for scoring and prioritizing capital deployment"
+    "file": "demos/CHATGPT.HTML",
+    "title": "ChatGPT Output",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with ChatGPT"
   },
   {
-    "file": "demos/gpu-compute-pricing.html",
-    "title": "GPU Compute Pricing Model",
-    "type": "tool",
-    "domain": "cast",
-    "description": "Dynamic pricing calculator for GPU compute financing"
+    "file": "demos/ClaudeDec8.html",
+    "title": "Claude Dec 8",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Claude — Dec 8"
   },
   {
-    "file": "demos/3pl-fulfillment-tracker.html",
-    "title": "3PL Fulfillment Tracker",
+    "file": "demos/Dec10Gemini.html",
+    "title": "Gemini Dec 10",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Gemini — Dec 10"
+  },
+  {
+    "file": "demos/GROK.html",
+    "title": "Grok Output",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Grok"
+  },
+  {
+    "file": "demos/GemDec8.html",
+    "title": "Gemini Dec 8",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Gemini — Dec 8"
+  },
+  {
+    "file": "demos/Gemini new Dec16.html",
+    "title": "Gemini Dec 16",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Gemini — Dec 16"
+  },
+  {
+    "file": "demos/Gemini_dec16 7pm.html",
+    "title": "Gemini Dec 16 (7pm)",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Gemini — Dec 16 evening"
+  },
+  {
+    "file": "demos/Labor_Capacity_Dashboard.html",
+    "title": "Labor Capacity Dashboard",
     "type": "dashboard",
     "domain": "operations",
-    "description": "Real-time fulfillment metrics across warehouse locations"
+    "description": "Workforce capacity planning dashboard"
   },
   {
-    "file": "demos/board-reporting-template.html",
-    "title": "Board Reporting Template",
+    "file": "demos/Mirror Table.html",
+    "title": "Mirror Table",
     "type": "methodology",
+    "domain": "sightline",
+    "description": "Mirror table concept visualization"
+  },
+  {
+    "file": "demos/MirrorTable for PO.html",
+    "title": "Mirror Table for PO",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Mirror table applied to purchase orders"
+  },
+  {
+    "file": "demos/Mobile Friendly CPGT Dec16.html",
+    "title": "Mobile ChatGPT Dec 16",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Mobile-friendly prototype via ChatGPT"
+  },
+  {
+    "file": "demos/SIGHTLINE SCHEMA.HTML",
+    "title": "Sightline Schema",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Sightline data schema definition"
+  },
+  {
+    "file": "demos/SL Fin Events Systems CPGT.html",
+    "title": "Sightline Financial Events System",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Financial events system architecture"
+  },
+  {
+    "file": "demos/Sightline_CAST_Architecture.html",
+    "title": "Sightline CAST Architecture",
+    "type": "methodology",
+    "domain": "cast",
+    "description": "CAST platform architecture overview"
+  },
+  {
+    "file": "demos/TENSOR.HTML",
+    "title": "Tensor Output",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Tensor"
+  },
+  {
+    "file": "demos/action_dimension_visual.html",
+    "title": "Action Dimension Visual",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Action dimension visualization"
+  },
+  {
+    "file": "demos/bb_dashboard.html",
+    "title": "BB Dashboard",
+    "type": "dashboard",
     "domain": "finance",
-    "description": "Standardized board deck with KPI framework"
+    "description": "Building blocks dashboard"
+  },
+  {
+    "file": "demos/bb_dashboard_v2 (1).html",
+    "title": "BB Dashboard v2 (alt)",
+    "type": "dashboard",
+    "domain": "finance",
+    "description": "Building blocks dashboard v2 — alternate"
+  },
+  {
+    "file": "demos/bb_dashboard_v2.html",
+    "title": "BB Dashboard v2",
+    "type": "dashboard",
+    "domain": "finance",
+    "description": "Building blocks dashboard v2"
+  },
+  {
+    "file": "demos/deepseek_GL Reporting of the.html",
+    "title": "GL Reporting (DeepSeek)",
+    "type": "prototype",
+    "domain": "finance",
+    "description": "General ledger reporting — DeepSeek"
+  },
+  {
+    "file": "demos/deepseek_html_20251210_463c51 V2.HTML",
+    "title": "DeepSeek Dec 10 v2",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 10 v2"
+  },
+  {
+    "file": "demos/deepseek_html_20251210_a9641c.HTML",
+    "title": "DeepSeek Dec 10",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 10"
+  },
+  {
+    "file": "demos/deepseek_html_20251211_800f30 V3.HTML",
+    "title": "DeepSeek Dec 11 v3",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 11 v3"
+  },
+  {
+    "file": "demos/deepseek_html_20251212_892609.html",
+    "title": "DeepSeek Dec 12 (a)",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 12"
+  },
+  {
+    "file": "demos/deepseek_html_20251212_bb6aa2.html",
+    "title": "DeepSeek Dec 12 (b)",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 12 alt"
+  },
+  {
+    "file": "demos/deepseek_html_20251215_800f30.html",
+    "title": "DeepSeek Dec 15",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 15"
+  },
+  {
+    "file": "demos/deepseek_html_20251216_651b35_DEC16.html",
+    "title": "DeepSeek Dec 16",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 16"
+  },
+  {
+    "file": "demos/deepseek_html_20251217_1c3a9a.html",
+    "title": "DeepSeek Dec 17 (a)",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 17"
+  },
+  {
+    "file": "demos/deepseek_html_20251217_dc182a_dec16 815pm.html",
+    "title": "DeepSeek Dec 17 (b)",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Dec 17 evening"
+  },
+  {
+    "file": "demos/deepseek_html_20260130_651b35.html",
+    "title": "DeepSeek Jan 30 (a)",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Jan 30"
+  },
+  {
+    "file": "demos/deepseek_html_20260130_f2c3f6.html",
+    "title": "DeepSeek Jan 30 (b)",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "DeepSeek prototype — Jan 30 alt"
+  },
+  {
+    "file": "demos/demo.html",
+    "title": "Demo",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "General Sightline demo"
+  },
+  {
+    "file": "demos/event_sourced_accounting_model.html",
+    "title": "Event-Sourced Accounting Model",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Event-sourced accounting model visualization"
+  },
+  {
+    "file": "demos/event_sourced_accounting_simple.html",
+    "title": "Event-Sourced Accounting (Simple)",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Simplified event-sourced accounting view"
+  },
+  {
+    "file": "demos/grok2.html",
+    "title": "Grok v2",
+    "type": "prototype",
+    "domain": "ai-compare",
+    "description": "Prototype generated with Grok v2"
+  },
+  {
+    "file": "demos/hoa_fraud_comparison (1).html",
+    "title": "HOA Fraud Comparison",
+    "type": "methodology",
+    "domain": "cast",
+    "description": "HOA fraud detection comparison"
+  },
+  {
+    "file": "demos/hoa_lawyer_analysis (1).html",
+    "title": "HOA Lawyer Analysis",
+    "type": "methodology",
+    "domain": "cast",
+    "description": "Legal analysis for HOA governance"
+  },
+  {
+    "file": "demos/hoa_trends_analysis (1).html",
+    "title": "HOA Trends Analysis",
+    "type": "methodology",
+    "domain": "cast",
+    "description": "HOA market and trend analysis"
+  },
+  {
+    "file": "demos/ip_protection_visual (1).html",
+    "title": "IP Protection Visual (alt)",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "IP protection visualization — alternate"
+  },
+  {
+    "file": "demos/ip_protection_visual.HTML",
+    "title": "IP Protection Visual",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Intellectual property protection visualization"
+  },
+  {
+    "file": "demos/mobile_policy_builder.html",
+    "title": "Mobile Policy Builder",
+    "type": "tool",
+    "domain": "cast",
+    "description": "Mobile-friendly policy builder interface"
+  },
+  {
+    "file": "demos/network_5tuple_mapping.html",
+    "title": "Network 5-Tuple Mapping",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Network 5-tuple mapping visualization"
+  },
+  {
+    "file": "demos/policy_binding_visual.HTML",
+    "title": "Policy Binding Visual",
+    "type": "methodology",
+    "domain": "cast",
+    "description": "Policy binding mechanism visualization"
+  },
+  {
+    "file": "demos/positioning-decisions.html",
+    "title": "Positioning Decisions",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Strategic positioning decision framework"
+  },
+  {
+    "file": "demos/replay_proof.html",
+    "title": "Replay Proof",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Deterministic replay proof demonstration"
+  },
+  {
+    "file": "demos/sightline-13-week-cashflow (1).html",
+    "title": "13-Week Cash Flow (alt)",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "13-week cash flow forecast — alternate"
+  },
+  {
+    "file": "demos/sightline-13-week-cashflow.html",
+    "title": "13-Week Cash Flow",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "13-week cash flow forecast"
+  },
+  {
+    "file": "demos/sightline-13week-forecast.html",
+    "title": "13-Week Forecast",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "13-week rolling forecast model"
+  },
+  {
+    "file": "demos/sightline-agents zz.html",
+    "title": "Sightline Agents (zz)",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Sightline agent architecture prototype"
+  },
+  {
+    "file": "demos/sightline-agents_claude.html",
+    "title": "Sightline Agents (Claude)",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Sightline agent architecture — Claude version"
+  },
+  {
+    "file": "demos/sightline-app updated 13 week forecast.html",
+    "title": "Sightline App — 13W Forecast",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Sightline app with updated 13-week forecast"
+  },
+  {
+    "file": "demos/sightline-app-full (excel).html",
+    "title": "Sightline App Full (Excel)",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Full Sightline app with Excel integration"
+  },
+  {
+    "file": "demos/sightline-app-full.html",
+    "title": "Sightline App Full",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Full Sightline application prototype"
+  },
+  {
+    "file": "demos/sightline-app-v2 (EDIT XYZ).html",
+    "title": "Sightline App v2 (Edit)",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Sightline app v2 — editable version"
+  },
+  {
+    "file": "demos/sightline-app-v2.html",
+    "title": "Sightline App v2",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Sightline application v2"
+  },
+  {
+    "file": "demos/sightline-app-v3.html",
+    "title": "Sightline App v3",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Sightline application v3"
+  },
+  {
+    "file": "demos/sightline-app.html",
+    "title": "Sightline App",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Sightline application prototype"
+  },
+  {
+    "file": "demos/sightline-app_Claude Dec16 10pm.html",
+    "title": "Sightline App (Claude Dec 16)",
+    "type": "tool",
+    "domain": "sightline",
+    "description": "Sightline app — Claude version Dec 16"
+  },
+  {
+    "file": "demos/sightline-cashflow-data-model.html",
+    "title": "Cash Flow Data Model",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Sightline cash flow data model architecture"
+  },
+  {
+    "file": "demos/sightline-compare.html",
+    "title": "Sightline Compare",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Comparative analysis view"
+  },
+  {
+    "file": "demos/sightline-dashboard (PO Fin1).html",
+    "title": "Sightline Dashboard (PO Fin 1)",
+    "type": "dashboard",
+    "domain": "sightline",
+    "description": "Sightline PO finance dashboard v1"
+  },
+  {
+    "file": "demos/sightline-dashboard.html",
+    "title": "Sightline Dashboard",
+    "type": "dashboard",
+    "domain": "sightline",
+    "description": "Core Sightline dashboard"
+  },
+  {
+    "file": "demos/sightline-demo (1).html",
+    "title": "Sightline Demo (alt)",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Sightline demo — alternate version"
+  },
+  {
+    "file": "demos/sightline-demo.html",
+    "title": "Sightline Demo",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Sightline platform demo"
+  },
+  {
+    "file": "demos/sightline-ecommerce-prototype.html",
+    "title": "Sightline Ecommerce Prototype",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Sightline applied to ecommerce"
+  },
+  {
+    "file": "demos/sightline-entropy-ui-mobile.html",
+    "title": "Sightline Entropy UI (Mobile)",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Mobile entropy UI prototype"
+  },
+  {
+    "file": "demos/sightline-event-detail2.html",
+    "title": "Sightline Event Detail v2",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Event detail view v2"
+  },
+  {
+    "file": "demos/sightline-events-journals.html",
+    "title": "Sightline Events & Journals",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Events-to-journals mapping"
+  },
+  {
+    "file": "demos/sightline-integrity (1).html",
+    "title": "Sightline Integrity (alt)",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Data integrity verification — alternate"
+  },
+  {
+    "file": "demos/sightline-integrity.html",
+    "title": "Sightline Integrity",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Data integrity verification"
+  },
+  {
+    "file": "demos/sightline-landing PO Fin2.html",
+    "title": "Sightline Landing (PO Fin 2)",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Landing page — PO finance v2"
+  },
+  {
+    "file": "demos/sightline-landing.html",
+    "title": "Sightline Landing",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Sightline landing page"
+  },
+  {
+    "file": "demos/sightline-landing2.html",
+    "title": "Sightline Landing v2",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Sightline landing page v2"
+  },
+  {
+    "file": "demos/sightline-landing_Claude_Dec10.html",
+    "title": "Sightline Landing (Claude Dec 10)",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Landing page — Claude version Dec 10"
+  },
+  {
+    "file": "demos/sightline-landing_Jan30.html",
+    "title": "Sightline Landing (Jan 30)",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Landing page — Jan 30 update"
+  },
+  {
+    "file": "demos/sightline-monitor-v2.html",
+    "title": "Sightline Monitor v2",
+    "type": "dashboard",
+    "domain": "sightline",
+    "description": "System monitoring dashboard v2"
+  },
+  {
+    "file": "demos/sightline-monitor.html",
+    "title": "Sightline Monitor",
+    "type": "dashboard",
+    "domain": "sightline",
+    "description": "System monitoring dashboard"
+  },
+  {
+    "file": "demos/sightline-pitch v2 simple.html",
+    "title": "Sightline Pitch v2",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Simplified pitch page v2"
+  },
+  {
+    "file": "demos/sightline-po-lending.html",
+    "title": "Sightline PO Lending",
+    "type": "prototype",
+    "domain": "cast",
+    "description": "Purchase order lending prototype"
+  },
+  {
+    "file": "demos/sightline-policies.html",
+    "title": "Sightline Policies",
+    "type": "methodology",
+    "domain": "cast",
+    "description": "Policy engine configuration"
+  },
+  {
+    "file": "demos/sightline-prototype-cfo.html",
+    "title": "Sightline Prototype (CFO)",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "CFO-oriented prototype"
+  },
+  {
+    "file": "demos/sightline-prototype.html",
+    "title": "Sightline Prototype",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Core Sightline prototype"
+  },
+  {
+    "file": "demos/sightline-trust-architecture.html",
+    "title": "Sightline Trust Architecture",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Trust and verification architecture"
+  },
+  {
+    "file": "demos/sightline-trust-table.html",
+    "title": "Sightline Trust Table",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Trust table visualization"
+  },
+  {
+    "file": "demos/sightline-ui.html",
+    "title": "Sightline UI",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Sightline UI exploration"
+  },
+  {
+    "file": "demos/sightline-unified-dashboard (1).html",
+    "title": "Sightline Unified Dashboard",
+    "type": "dashboard",
+    "domain": "sightline",
+    "description": "Unified multi-view dashboard"
+  },
+  {
+    "file": "demos/sightline-workflows.html",
+    "title": "Sightline Workflows",
+    "type": "methodology",
+    "domain": "sightline",
+    "description": "Workflow orchestration visualization"
+  },
+  {
+    "file": "demos/sightline_dashboard (1).html",
+    "title": "Sightline Dashboard (alt)",
+    "type": "dashboard",
+    "domain": "sightline",
+    "description": "Sightline dashboard — alternate"
+  },
+  {
+    "file": "demos/sightline_landing (1).html",
+    "title": "Sightline Landing (alt)",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Sightline landing page — alternate"
+  },
+  {
+    "file": "demos/sightline_landing.html",
+    "title": "Sightline Landing (v)",
+    "type": "landing",
+    "domain": "sightline",
+    "description": "Sightline landing page variant"
+  },
+  {
+    "file": "demos/sightline_prototype.html",
+    "title": "Sightline Prototype (v)",
+    "type": "prototype",
+    "domain": "sightline",
+    "description": "Sightline prototype variant"
+  },
+  {
+    "file": "demos/sightline_settlement_gate_mvp_seeded.html",
+    "title": "Settlement Gate MVP (Seeded)",
+    "type": "prototype",
+    "domain": "cast",
+    "description": "Settlement gate MVP with seed data"
+  },
+  {
+    "file": "demos/sightline_settlement_gate_mvp_updated.html",
+    "title": "Settlement Gate MVP (Updated)",
+    "type": "prototype",
+    "domain": "cast",
+    "description": "Settlement gate MVP — updated version"
+  },
+  {
+    "file": "demos/xxxx energy-report.html",
+    "title": "Energy Report",
+    "type": "dashboard",
+    "domain": "finance",
+    "description": "Energy sector report"
   }
 ]
