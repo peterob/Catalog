@@ -1,0 +1,44 @@
+[
+  {
+    "file": "demos/cash-flow-waterfall.html",
+    "title": "Cash Flow Waterfall",
+    "type": "dashboard",
+    "domain": "finance",
+    "description": "Interactive waterfall chart showing cash flow sources and uses"
+  },
+  {
+    "file": "demos/event-sourced-ledger.html",
+    "title": "Event-Sourced Ledger",
+    "type": "prototype",
+    "domain": "cast",
+    "description": "Demo of deterministic ledger with cryptographic proofs"
+  },
+  {
+    "file": "demos/capital-allocation-matrix.html",
+    "title": "Capital Allocation Matrix",
+    "type": "methodology",
+    "domain": "finance",
+    "description": "Framework for scoring and prioritizing capital deployment"
+  },
+  {
+    "file": "demos/gpu-compute-pricing.html",
+    "title": "GPU Compute Pricing Model",
+    "type": "tool",
+    "domain": "cast",
+    "description": "Dynamic pricing calculator for GPU compute financing"
+  },
+  {
+    "file": "demos/3pl-fulfillment-tracker.html",
+    "title": "3PL Fulfillment Tracker",
+    "type": "dashboard",
+    "domain": "operations",
+    "description": "Real-time fulfillment metrics across warehouse locations"
+  },
+  {
+    "file": "demos/board-reporting-template.html",
+    "title": "Board Reporting Template",
+    "type": "methodology",
+    "domain": "finance",
+    "description": "Standardized board deck with KPI framework"
+  }
+]
