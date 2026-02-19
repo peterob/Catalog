@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- iPhone-friendly viewport + safe area support -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <title>FinEventCore™ Demo</title>
+
+  <style>
+    :root{
+      --primary:#2c7da0;
+      --bg:#f5f7fa;
+      --card:#ffffff;
+      --border:#e9ecef;
+      --text:#111827;
+      --muted:#6b7280;
+
+      --good:#28a745;
+      --bad:#dc3545;
+
+      --warn-bg:#fff3cd;
+      --warn-border:#ffc107;
+
+      --ok-bg:#d4edda;
+      --ok-border:#28a745;
+
+      --radius:12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+
+      /* Safe-area padding for iPhone notch / home indicator */
+      padding:
+        calc(16px + env(safe-area-inset-top))
+        calc(16px + env(safe-area-inset-right))
+        calc(24px + env(safe-area-inset-bottom))
+        calc(16px + env(safe-area-inset-left));
+    }
+
+    .container{
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .header{
+      background: var(--primary);
+      color: #fff;
+      padding: 20px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+    }
+
+    .header h1{
+      font-size: clamp(26px, 6vw, 40px);
+      line-height: 1.1;
+    }
+
+    .header p{
+      margin-top: 8px;
+      opacity: 0.95;
+      line-height: 1.35;
+    }
+
+    .toggle{
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn{
+      flex: 1 1 220px;      /* wrap on narrow screens */
+      min-height: 44px;     /* iOS recommended tap target */
+      padding: 12px 14px;
+
+      border: 2px solid var(--primary);
+      background: #fff;
+      color: var(--primary);
+      border-radius: 10px;
+
+      font-weight: 650;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn.active{
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn:focus-visible{
+      outline: 3px solid rgba(44,125,160,0.35);
+      outline-offset: 2px;
+    }
+
+    .view[hidden]{ display: none; }
+
+    .card{
+      background: var(--card);
+      padding: 16px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 1px 0 rgba(17,24,39,0.04);
+    }
+
+    .expense{ border-left-color: #2a9d8f; }
+
+    .card h3{
+      font-size: 18px;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .card p{
+      margin-top: 6px;
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    /* Table wrapper: iPhone-friendly horizontal scroll */
+    .table-wrap{
+      margin-top: 12px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px; /* forces scroll on phones instead of squishing columns */
+    }
+
+    th{
+      background: var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    td{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .total{
+      font-weight: 800;
+      background: #f8f9fa;
+    }
+
+    .positive{ color: var(--good); }
+    .negative{ color: var(--bad); }
+
+    .callout, .enhancement{
+      padding: 14px;
+      margin-top: 14px;
+      border-left: 4px solid;
+      border-radius: 10px;
+    }
+
+    .callout{
+      background: var(--warn-bg);
+      border-left-color: var(--warn-border);
+    }
+
+    .enhancement{
+      background: var(--ok-bg);
+      border-left-color: var(--ok-border);
+    }
+
+    .callout h4, .enhancement h4{
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    ul{
+      padding-left: 18px;
+      line-height: 1.45;
+    }
+
+    /* Extra tightening for small iPhones */
+    @media (max-width: 420px){
+      .header{ padding: 16px; }
+      .card{ padding: 14px; }
+      .btn{ flex-basis: 160px; }
+      table{ min-width: 520px; }
+    }
+
+    /* Optional dark mode support */
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b1220;
+        --card:#0f172a;
+        --border:#1f2937;
+        --text:#e5e7eb;
+        --muted:#9ca3af;
+
+        --warn-bg:#3a2f12;
+        --ok-bg:#163322;
+      }
+
+      .btn{ background: transparent; }
+      .table-wrap{ background: transparent; }
+      .total{ background: rgba(255,255,255,0.04); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>FinEventCore™</h1>
+      <p>Event-Based Financial System - Interactive Demo</p>
+    </div>
+
+    <div class="toggle" role="tablist" aria-label="Demo views">
+      <button type="button" class="btn active" role="tab"
+              aria-selected="true" aria-controls="events"
+              data-view="events">
+        Event-Based Transactions
+      </button>
+
+      <button type="button" class="btn" role="tab"
+              aria-selected="false" aria-controls="reports"
+              data-view="reports">
+        📊 Reporting Comparison
+      </button>
+    </div>
+
+    <div id="events" class="view" role="tabpanel">
+      <div class="card expense">
+        <h3>$50,000 - Digital Campaign Agency Payment</h3>
+        <p><strong>Vendor:</strong> Creative Partners LLC</p>
+        <p><strong>Initiative:</strong> Enterprise Growth</p>
+        <p><strong>Performance:</strong> 150 leads @ $333/lead</p>
+      </div>
+
+      <div class="card">
+        <h3>$120,000 - Annual Software License Renewal</h3>
+        <p><strong>Customer:</strong> Acme Corporation</p>
+        <p><strong>Growth:</strong> 15% increase ($15,652 additional ARR)</p>
+      </div>
+    </div>
+
+    <div id="reports" class="view" role="tabpanel" hidden>
+      <div class="card">
+        <h3>📊 Traditional Transaction-Based Report</h3>
+        <p><strong>Marketing Department - March 2025</strong></p>
+
+        <div class="table-wrap" aria-label="Traditional report table">
+          <table>
+            <tr>
+              <th>Account</th>
+              <th style="text-align:right">Amount</th>
+              <th style="text-align:right">Variance</th>
+            </tr>
+            <tr>
+              <td>Advertising</td>
+              <td style="text-align:right">$78,500</td>
+              <td style="text-align:right" class="positive">+$3,500</td>
+            </tr>
+            <tr>
+              <td>Agency Fees</td>
+              <td style="text-align:right">$50,000</td>
+              <td style="text-align:right" class="negative">-$2,000</td>
+            </tr>
+            <tr>
+              <td>Materials</td>
+              <td style="text-align:right">$12,300</td>
+              <td style="text-align:right" class="negative">-$700</td>
+            </tr>
+            <tr>
+              <td>Events</td>
+              <td style="text-align:right">$25,450</td>
+              <td style="text-align:right" class="positive">+$5,450</td>
+            </tr>
+            <tr class="total">
+              <td>TOTAL</td>
+              <td style="text-align:right">$166,250</td>
+              <td style="text-align:right" class="positive">+$6,250</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="callout">
+          <h4>⚠️ What This Report CANNOT Tell You:</h4>
+          <ul>
+            <li>Which initiatives are driving spend?</li>
+            <li>What business results did we get?</li>
+            <li>Which campaigns are most cost-effective?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🎯 Event-Based Strategic Performance Report</h3>
+        <p><strong>Marketing by Initiative - March 2025</strong></p>
+
+        <div class="table-wrap" aria-label="Event-based report table">
+          <table>
+            <tr>
+              <th>Initiative</th>
+              <th style="text-align:right">Investment</th>
+              <th style="text-align:right">Leads</th>
+              <th style="text-align:right">Cost/Lead</th>
+              <th style="text-align:right">CAC</th>
+            </tr>
+            <tr>
+              <td>Enterprise Growth</td>
+              <td style="text-align:right">$105,750</td>
+              <td style="text-align:right">310</td>
+              <td style="text-align:right">$341</td>
+              <td style="text-align:right">$6,221</td>
+            </tr>
+            <tr>
+              <td>SMB Expansion</td>
+              <td style="text-align:right">$35,500</td>
+              <td style="text-align:right">124</td>
+              <td style="text-align:right">$286</td>
+              <td style="text-align:right">$4,438</td>
+            </tr>
+            <tr>
+              <td>Product Launch</td>
+              <td style="text-align:right">$25,000</td>
+              <td style="text-align:right">67</td>
+              <td style="text-align:right">$373</td>
+              <td style="text-align:right">$6,250</td>
+            </tr>
+            <tr class="total">
+              <td>TOTAL</td>
+              <td style="text-align:right">$166,250</td>
+              <td style="text-align:right">501</td>
+              <td style="text-align:right">$332</td>
+              <td style="text-align:right">$5,733</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="enhancement">
+          <h4>✅ Strategic Insights:</h4>
+          <ul>
+            <li><strong>SMB Expansion most efficient:</strong> Lowest CAC at $4,438</li>
+            <li><strong>Enterprise Growth drives volume:</strong> 62% of all leads</li>
+            <li><strong>ROI tracking enabled:</strong> Direct link to business outcomes</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // iPhone/Safari-safe toggling (no reliance on global `event`)
+    const buttons = Array.from(document.querySelectorAll('.btn[role="tab"]'));
+    const views = Array.from(document.querySelectorAll('.view[role="tabpanel"]'));
+
+    function activate(viewId) {
+      buttons.forEach(b => {
+        const isActive = b.dataset.view === viewId;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-selected', String(isActive));
+      });
+
+      views.forEach(v => {
+        const isActive = v.id === viewId;
+        v.hidden = !isActive;
+      });
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => activate(btn.dataset.view));
+    });
+
+    // Ensure initial state is consistent
+    activate('events');
+  </script>
+</body>
+</html>

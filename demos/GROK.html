@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deterministic Event Framework Prototype</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-vis@1/dist/react-vis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7/babel.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    h1 { text-align: center; }
+    .controls { margin: 20px 0; text-align: center; }
+    pre { background: #eee; padding: 10px; border-radius: 5px; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { XYPlot, LineSeries, MarkSeries, XAxis, YAxis, Hint } = reactVis;
+
+    // Hardcoded sample events (from expanded example)
+    const sampleEvents = [
+      { event_id: "hash1", timestamp: "2025-11-16T10:00:00Z", payload: { action: "RECEIVE_INVENTORY", resource: "SKU_123", quantity: 100 } },
+      { event_id: "hash4", timestamp: "2025-11-20T14:00:00Z", payload: { action: "RECORD_SALE", resource: "Invoice_001", amount: 2000 } },
+      { event_id: "hash6", timestamp: "2025-11-25T11:00:00Z", payload: { action: "RECORD_EXPENSE", resource: "Salary_Nov", amount: 500 } },
+      { event_id: "hash2", timestamp: "2025-12-01T10:00:00Z", payload: { action: "TRANSFER_ASSET", resource: "SKU_123", quantity: 50 } },
+      { event_id: "hash5", timestamp: "2025-12-05T09:00:00Z", payload: { action: "RECEIVE_PAYMENT", resource: "Invoice_001", amount: 2000 } },
+      { event_id: "hash7", timestamp: "2025-12-10T12:00:00Z", payload: { action: "RECORD_EXPENSE", resource: "Rent_Dec", amount: 300 } },
+      { event_id: "hash3", timestamp: "2025-12-16T10:00:00Z", payload: { action: "SHIP_INVENTORY", resource: "SKU_123", quantity: 50 } }
+    ].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    function App() {
+      const [events] = useState(sampleEvents);
+      const [selected, setSelected] = useState(null);
+      const [playing, setPlaying] = useState(false);
+      const [currentIndex, setCurrentIndex] = useState(events.length - 1);
+
+      useEffect(() => {
+        if (playing && currentIndex < events.length - 1) {
+          const timer = setTimeout(() => setCurrentIndex(i => i + 1), 1000);
+          return () => clearTimeout(timer);
+        } else if (playing) setPlaying(false);
+      }, [playing, currentIndex]);
+
+      const visibleEvents = events.slice(0, currentIndex + 1);
+      const timelineData = visibleEvents.map((e, i) => ({
+        x: new Date(e.timestamp).getTime(),
+        y: i + 1,
+        label: e.payload.action
+      }));
+
+      return (
+        <div>
+          <h1>Business Replay Intelligence (Static Demo)</h1>
+          <div className="controls">
+            <button onClick={() => setPlaying(!playing)}>{playing ? 'Pause' : 'Play'}</button>
+            <button onClick={() => setCurrentIndex(events.length - 1)}>Reset</button>
+          </div>
+
+          <h2>Timeline</h2>
+          <XYPlot width={800} height={400} xType="time" margin={{left: 80}}>
+            <XAxis title="Time" />
+            <YAxis title="Event Sequence" />
+            <LineSeries data={timelineData} />
+            <MarkSeries data={timelineData} onValueClick={(d) => setSelected(visibleEvents[d.y - 1])} />
+            {selected && <Hint value={timelineData.find(p => p.y === visibleEvents.indexOf(selected) + 1)}>
+              <div style={{background: 'black', color: 'white', padding: '5px'}}>{selected.payload.action}</div>
+            </Hint>}
+          </XYPlot>
+
+          <h2>Events</h2>
+          <ul>
+            {visibleEvents.map(e => (
+              <li key={e.event_id} onClick={() => setSelected(e)} style={{cursor: 'pointer'}}>
+                {e.payload.action} - {moment(e.timestamp).format('YYYY-MM-DD HH:mm')}
+              </li>
+            ))}
+          </ul>
+
+          {selected && (
+            <div>
+              <h3>Selected Event Details</h3>
+              <pre>{JSON.stringify(selected, null, 2)}</pre>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

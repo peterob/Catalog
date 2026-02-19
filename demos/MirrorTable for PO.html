@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acme Supplier Portal | Crypto-to-ERP Demo</title>
+    <style>
+        /* ============================
+           ENTERPRISE CSS STYLES
+           ============================ */
+        :root {
+            --brand-color: #0f172a; /* Slate 900 */
+            --brand-accent: #3b82f6; /* Blue 500 */
+            --success-color: #10b981;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            width: 100%;
+            background-color: white;
+            padding: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header-content {
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .logo-box {
+            background: var(--brand-color);
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* MAIN CARD */
+        .container {
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 32px;
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--brand-color);
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* FORM ELEMENTS */
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            text-align: left;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+
+        .input-group:focus-within {
+            border-color: var(--brand-accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        input {
+            width: 100%;
+            border: none;
+            font-size: 16px;
+            outline: none;
+            color: var(--text-main);
+        }
+
+        .currency-label {
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--brand-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1e293b;
+        }
+
+        .btn-pay {
+            background-color: var(--brand-accent);
+            color: white;
+            margin-top: 8px;
+        }
+        .btn-pay:hover:not(:disabled) {
+            background-color: #2563eb;
+        }
+        .btn:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* SYSTEM LOG (THE BRIDGE VISUALIZER) */
+        .system-log {
+            margin-top: 20px;
+            background-color: #1e1e1e; /* Terminal Black */
+            color: #00ff00; /* Hacker Green */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            padding: 15px;
+            border-radius: 8px;
+            height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 2px;
+        }
+        .log-time {
+            color: #666;
+            margin-right: 8px;
+        }
+
+        /* UTILS */
+        .hidden { display: none; }
+        .wallet-badge {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-content">
+            <span class="logo-box">ACME</span>
+            <span style="font-weight: 600; color: var(--text-main);">Supplier Payment Portal</span>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="card">
+            
+            <div id="view-connect">
+                <h1>Welcome, Vendor</h1>
+                <p class="subtitle">Connect your corporate wallet to settle invoices instantly via USDC.</p>
+                <button class="btn btn-primary" onclick="connectWallet()">
+                    Connect Wallet (Metamask/Ledger)
+                </button>
+            </div>
+
+            <div id="view-pay" class="hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h1>Pay Invoice</h1>
+                    <span class="wallet-badge" id="wallet-address">0x...</span>
+                </div>
+                <p class="subtitle">Payments are automatically reconciled in SAP.</p>
+
+                <label class="form-label">Purchase Order / Invoice #</label>
+                <div class="input-group">
+                    <input type="text" id="po-input" placeholder="e.g. PO-1234" value="PO-1234">
+                </div>
+
+                <label class="form-label">Amount Due</label>
+                <div class="input-group">
+                    <input type="number" id="amount-input" placeholder="0.00">
+                    <span class="currency-label">USDC</span>
+                </div>
+
+                <button id="pay-btn" class="btn btn-pay" onclick="payInvoice()">
+                    Pay Invoice
+                </button>
+            </div>
+
+            <div id="view-success" class="hidden" style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
+                <h1 style="color: var(--success-color);">Payment Complete</h1>
+                <p class="subtitle">
+                    Transaction Confirmed.<br>
+                    <strong>Bridge Status:</strong> Reconciled in ERP.<br>
+                </p>
+                <button class="btn btn-primary" onclick="resetDemo()">Submit Another Payment</button>
+            </div>
+
+        </div>
+
+        <div class="system-log" id="system-log">
+            <div class="log-entry"><span class="log-time">10:00:01</span> [System] Bridge Service Initialized...</div>
+            <div class="log-entry"><span class="log-time">10:00:02</span> [System] Connected to SAP ERP Gateway.</div>
+            <div class="log-entry"><span class="log-time">10:00:02</span> [Listener] Waiting for blockchain events...</div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================
+        // DEMO LOGIC
+        // ============================
+
+        function addLog(message) {
+            const logBox = document.getElementById('system-log');
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">${time}</span> ${message}`;
+            logBox.appendChild(entry);
+            logBox.scrollTop = logBox.scrollHeight; // Auto-scroll to bottom
+        }
+
+        function connectWallet() {
+            const btn = document.querySelector('#view-connect .btn');
+            btn.innerHTML = "<span class='spinner'></span> Connecting...";
+            
+            setTimeout(() => {
+                document.getElementById('view-connect').classList.add('hidden');
+                document.getElementById('view-pay').classList.remove('hidden');
+                document.getElementById('wallet-address').innerText = "0x71C...9A23";
+                addLog("[Auth] Wallet 0x71C...9A23 connected.");
+            }, 800);
+        }
+
+        function payInvoice() {
+            const poNum = document.getElementById('po-input').value;
+            const amount = document.getElementById('amount-input').value;
+            const btn = document.getElementById('pay-btn');
+
+            if(!poNum || !amount) {
+                alert("Please enter PO Number and Amount");
+                return;
+            }
+
+            // 1. UI STATE: SENDING
+            btn.disabled = true;
+            btn.innerHTML = "<span class='spinner'></span> Processing on Blockchain...";
+            addLog(`[User] Initiating Tx: Pay ${amount} USDC for ${poNum}`);
+
+            // 2. SIMULATE BLOCKCHAIN CONFIRMATION (1.5s)
+            setTimeout(() => {
+                addLog(`[Chain] ⏳ Tx Pending... (Hash: 0x8a1...f9)`);
+                
+                setTimeout(() => {
+                    addLog(`[Chain] ✅ Tx Confirmed! Event Emitted: PaymentReceived`);
+                    
+                    // 3. SIMULATE BRIDGE / ERP SYNC (The "Magic" Part)
+                    triggerBridgeSync(poNum, amount);
+
+                }, 1500);
+            }, 1000);
+        }
+
+        function triggerBridgeSync(poNum, amount) {
+            const btn = document.getElementById('pay-btn');
+            btn.innerHTML = "<span class='spinner'></span> Bridge Syncing...";
+            
+            addLog(`[Bridge] 👁️ DETECTED EVENT: Payment for ${poNum}`);
+            addLog(`[Bridge] 🔄 Connecting to NetSuite ERP API...`);
+
+            setTimeout(() => {
+                addLog(`[ERP] 🔎 Found Invoice #${poNum} (Status: PENDING)`);
+                addLog(`[ERP] ✏️ Updating Status to 'PAID' (Amount: $${amount})`);
+                
+                setTimeout(() => {
+                    addLog(`[ERP] ✅ SUCCESS: Record updated. Warehouse notified.`);
+                    
+                    // SHOW SUCCESS SCREEN
+                    document.getElementById('view-pay').classList.add('hidden');
+                    document.getElementById('view-success').classList.remove('hidden');
+                }, 800);
+            }, 1200);
+        }
+
+        function resetDemo() {
+            document.getElementById('view-success').classList.add('hidden');
+            document.getElementById('view-pay').classList.remove('hidden');
+            document.getElementById('amount-input').value = "";
+            document.getElementById('pay-btn').disabled = false;
+            document.getElementById('pay-btn').innerHTML = "Pay Invoice";
+            addLog("[System] Ready for next transaction...");
+        }
+
+    </script>
+</body>
+</html>

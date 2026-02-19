@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Borrowing Base Demo – A vs B</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 16px; background: #f7f7fb; color:#111; }
+  .card { background: #fff; border: 1px solid #e6e6ef; border-radius: 14px; padding: 14px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);}
+  h1 { font-size: 20px; margin: 0 0 8px 0; }
+  h2 { font-size: 16px; margin: 0 0 10px 0; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  .pill { padding:8px 10px; border-radius:999px; border:1px solid #ddd; background:#fafafa; font-size:13px; }
+  .toggle { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .btn { padding:10px 12px; border-radius:10px; border:1px solid #cfcfe8; background:#fff; cursor:pointer; font-weight:600; }
+  .btn.active { background:#3b2bbf; border-color:#3b2bbf; color:#fff; }
+  table { width:100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border-bottom: 1px solid #eee; padding: 8px 6px; text-align:left; }
+  th { font-size: 12px; color:#555; }
+  .num { text-align:right; font-variant-numeric: tabular-nums; }
+  .small { font-size: 12px; color:#666; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Borrowing Base Demo</h1>
+  <div class="toggle">
+    <span class="small">Mode:</span>
+    <button id="modeA" class="btn">A — Trial Balance timing</button>
+    <button id="modeB" class="btn active">B — Event timing</button>
+    <span class="small">As-of:</span>
+    <input id="asof" type="date" />
+    <label class="small"><input id="includeFuture" type="checkbox" checked /> include future plan</label>
+  </div>
+  <div class="row" style="margin-top:10px;">
+    <div class="pill">Revolver Outstanding: <b id="rev"></b></div>
+    <div class="pill">Borrowing Base: <b id="bb"></b></div>
+    <div class="pill">Availability: <b id="avail"></b></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Components</h2>
+  <table>
+    <thead>
+      <tr><th>Component</th><th class="num">Gross</th><th class="num">Rate</th><th class="num">Eligible / Reserve</th></tr>
+    </thead>
+    <tbody id="components"></tbody>
+  </table>
+  <div class="small" style="margin-top:8px;">
+    Mode A uses <b>GL timing</b> (and excludes on-water + off-GL reserves). Mode B uses <b>event timing</b> (and applies policy immediately).
+  </div>
+</div>
+
+<div class="card">
+  <h2>Time-to-GL lag metrics</h2>
+  <table>
+    <thead>
+      <tr><th>Component</th><th>GL status</th><th class="num">Avg lag (days)</th><th class="num">Max lag (days)</th></tr>
+    </thead>
+    <tbody id="lags"></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>13-week availability forecast</h2>
+  <div class="small" style="margin-bottom:8px;">Weekly view of A vs B for the same planned events.</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Week End</th>
+        <th class="num">BB A</th><th class="num">Avail A</th>
+        <th class="num">BB B</th><th class="num">Avail B</th>
+      </tr>
+    </thead>
+    <tbody id="forecast"></tbody>
+  </table>
+</div>
+
+<script>
+const REV = 600000;
+const AR_ADV = 0.85;
+const INV_ADV = 0.5;
+const ONW_ADV = 0.25;
+
+const EVENTS = [{"event_date": "2025-01-02", "event_type": "PO_ISSUED", "counterparty": "Vendor A", "reference_id": "PO1001", "amount": 1000000, "currency": "USD", "evidence": NaN, "gl_post_date": NaN, "gl_lag_days": NaN}, {"event_date": "2025-01-03", "event_type": "VENDOR_DEPOSIT_PAID", "counterparty": "Vendor A", "reference_id": "PO1001", "amount": 300000, "currency": "USD", "evidence": "Bank Wire #7781", "gl_post_date": "2025-01-08", "gl_lag_days": 5.0}, {"event_date": "2025-01-15", "event_type": "ON_WATER", "counterparty": "Vendor A", "reference_id": "PO1001", "amount": 700000, "currency": "USD", "evidence": "BL#9981", "gl_post_date": NaN, "gl_lag_days": NaN}, {"event_date": "2025-01-25", "event_type": "RECEIVED_3PL", "counterparty": "Vendor A", "reference_id": "PO1001", "amount": 700000, "currency": "USD", "evidence": "3PL ASN", "gl_post_date": "2025-01-28", "gl_lag_days": 3.0}, {"event_date": "2025-02-01", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer X", "reference_id": "INV9001", "amount": 500000, "currency": "USD", "evidence": "Invoice issued", "gl_post_date": "2025-02-02", "gl_lag_days": 1.0}, {"event_date": "2025-02-15", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer X", "reference_id": "INV9001", "amount": 500000, "currency": "USD", "evidence": "ACH deposit", "gl_post_date": "2025-02-17", "gl_lag_days": 2.0}];
+const FUTURE = [{"event_date": "2025-02-17", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_01", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-02-18", "gl_lag_days": 1.0}, {"event_date": "2025-02-27", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_01", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-03-01", "gl_lag_days": 2.0}, {"event_date": "2025-02-20", "event_type": "RECEIVED_3PL", "counterparty": "Vendor Mix", "reference_id": "PO_F_01", "amount": 500000, "currency": "USD", "evidence": "Plan: inbound receipts", "gl_post_date": "2025-02-23", "gl_lag_days": 3.0}, {"event_date": "2025-02-24", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_02", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-02-25", "gl_lag_days": 1.0}, {"event_date": "2025-03-06", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_02", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-03-08", "gl_lag_days": 2.0}, {"event_date": "2025-03-03", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_03", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-03-04", "gl_lag_days": 1.0}, {"event_date": "2025-03-13", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_03", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-03-15", "gl_lag_days": 2.0}, {"event_date": "2025-03-06", "event_type": "RECEIVED_3PL", "counterparty": "Vendor Mix", "reference_id": "PO_F_03", "amount": 500000, "currency": "USD", "evidence": "Plan: inbound receipts", "gl_post_date": "2025-03-09", "gl_lag_days": 3.0}, {"event_date": "2025-03-10", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_04", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-03-11", "gl_lag_days": 1.0}, {"event_date": "2025-03-20", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_04", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-03-22", "gl_lag_days": 2.0}, {"event_date": "2025-03-17", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_05", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-03-18", "gl_lag_days": 1.0}, {"event_date": "2025-03-27", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_05", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-03-29", "gl_lag_days": 2.0}, {"event_date": "2025-03-20", "event_type": "RECEIVED_3PL", "counterparty": "Vendor Mix", "reference_id": "PO_F_05", "amount": 500000, "currency": "USD", "evidence": "Plan: inbound receipts", "gl_post_date": "2025-03-23", "gl_lag_days": 3.0}, {"event_date": "2025-03-24", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_06", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-03-25", "gl_lag_days": 1.0}, {"event_date": "2025-04-03", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_06", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-04-05", "gl_lag_days": 2.0}, {"event_date": "2025-03-31", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_07", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-04-01", "gl_lag_days": 1.0}, {"event_date": "2025-04-10", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_07", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-04-12", "gl_lag_days": 2.0}, {"event_date": "2025-04-03", "event_type": "RECEIVED_3PL", "counterparty": "Vendor Mix", "reference_id": "PO_F_07", "amount": 500000, "currency": "USD", "evidence": "Plan: inbound receipts", "gl_post_date": "2025-04-06", "gl_lag_days": 3.0}, {"event_date": "2025-04-07", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_08", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-04-08", "gl_lag_days": 1.0}, {"event_date": "2025-04-17", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_08", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-04-19", "gl_lag_days": 2.0}, {"event_date": "2025-04-14", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_09", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-04-15", "gl_lag_days": 1.0}, {"event_date": "2025-04-24", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_09", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-04-26", "gl_lag_days": 2.0}, {"event_date": "2025-04-17", "event_type": "RECEIVED_3PL", "counterparty": "Vendor Mix", "reference_id": "PO_F_09", "amount": 500000, "currency": "USD", "evidence": "Plan: inbound receipts", "gl_post_date": "2025-04-20", "gl_lag_days": 3.0}, {"event_date": "2025-04-21", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_10", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-04-22", "gl_lag_days": 1.0}, {"event_date": "2025-05-01", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_10", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-05-03", "gl_lag_days": 2.0}, {"event_date": "2025-04-28", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_11", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-04-29", "gl_lag_days": 1.0}, {"event_date": "2025-05-08", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_11", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-05-10", "gl_lag_days": 2.0}, {"event_date": "2025-05-01", "event_type": "RECEIVED_3PL", "counterparty": "Vendor Mix", "reference_id": "PO_F_11", "amount": 500000, "currency": "USD", "evidence": "Plan: inbound receipts", "gl_post_date": "2025-05-04", "gl_lag_days": 3.0}, {"event_date": "2025-05-05", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_12", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-05-06", "gl_lag_days": 1.0}, {"event_date": "2025-05-15", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_12", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-05-17", "gl_lag_days": 2.0}, {"event_date": "2025-05-12", "event_type": "CUSTOMER_INVOICE", "counterparty": "Customer Mix", "reference_id": "INV_F_13", "amount": 350000, "currency": "USD", "evidence": "Plan: weekly invoicing", "gl_post_date": "2025-05-13", "gl_lag_days": 1.0}, {"event_date": "2025-05-22", "event_type": "CUSTOMER_PAYMENT", "counterparty": "Customer Mix", "reference_id": "INV_F_13", "amount": 300000, "currency": "USD", "evidence": "Plan: payment cadence", "gl_post_date": "2025-05-24", "gl_lag_days": 2.0}, {"event_date": "2025-05-15", "event_type": "RECEIVED_3PL", "counterparty": "Vendor Mix", "reference_id": "PO_F_13", "amount": 500000, "currency": "USD", "evidence": "Plan: inbound receipts", "gl_post_date": "2025-05-18", "gl_lag_days": 3.0}, {"event_date": "2025-02-18", "event_type": "VENDOR_DEPOSIT_PAID", "counterparty": "Vendor B", "reference_id": "PO2002", "amount": 200000, "currency": "USD", "evidence": "Plan: deposit", "gl_post_date": "2025-02-23", "gl_lag_days": 5.0}, {"event_date": "2025-03-01", "event_type": "ON_WATER", "counterparty": "Vendor B", "reference_id": "PO2002", "amount": 800000, "currency": "USD", "evidence": "Plan: BL pending", "gl_post_date": NaN, "gl_lag_days": NaN}];
+const LAGS = [{"component": "Accounts Receivable", "gl_status": "GL-posted", "avg_lag_days": 1.5, "max_lag_days": 2}, {"component": "Inventory at 3PL", "gl_status": "GL-posted", "avg_lag_days": 3.0, "max_lag_days": 3}, {"component": "On Water Inventory", "gl_status": "Not in GL (policy/memo)", "avg_lag_days": "", "max_lag_days": ""}, {"component": "Defined AP Reserve", "gl_status": "Not in GL (policy/memo)", "avg_lag_days": "", "max_lag_days": ""}];
+const FORECAST = [{"week_end": "2025-02-23", "BB_TrialBalance_A": 897500.0, "Availability_A": 297500.0, "BB_Event_B": 572500.0, "Availability_B": -27500.0}, {"week_end": "2025-03-02", "BB_TrialBalance_A": 940000.0, "Availability_A": 340000.0, "BB_Event_B": 815000.0, "Availability_B": 215000.0}, {"week_end": "2025-03-09", "BB_TrialBalance_A": 1232500.0, "Availability_A": 632500.0, "BB_Event_B": 1107500.0, "Availability_B": 507500.0}, {"week_end": "2025-03-16", "BB_TrialBalance_A": 1275000.0, "Availability_A": 675000.0, "BB_Event_B": 1150000.0, "Availability_B": 550000.0}, {"week_end": "2025-03-23", "BB_TrialBalance_A": 1567500.0, "Availability_A": 967500.0, "BB_Event_B": 1442500.0, "Availability_B": 842500.0}, {"week_end": "2025-03-30", "BB_TrialBalance_A": 1610000.0, "Availability_A": 1010000.0, "BB_Event_B": 1485000.0, "Availability_B": 885000.0}, {"week_end": "2025-04-06", "BB_TrialBalance_A": 1902500.0, "Availability_A": 1302500.0, "BB_Event_B": 1777500.0, "Availability_B": 1177500.0}, {"week_end": "2025-04-13", "BB_TrialBalance_A": 1945000.0, "Availability_A": 1345000.0, "BB_Event_B": 1820000.0, "Availability_B": 1220000.0}, {"week_end": "2025-04-20", "BB_TrialBalance_A": 2237500.0, "Availability_A": 1637500.0, "BB_Event_B": 2112500.0, "Availability_B": 1512500.0}, {"week_end": "2025-04-27", "BB_TrialBalance_A": 2280000.0, "Availability_A": 1680000.0, "BB_Event_B": 2155000.0, "Availability_B": 1555000.0}, {"week_end": "2025-05-04", "BB_TrialBalance_A": 2572500.0, "Availability_A": 1972500.0, "BB_Event_B": 2447500.0, "Availability_B": 1847500.0}, {"week_end": "2025-05-11", "BB_TrialBalance_A": 2615000.0, "Availability_A": 2015000.0, "BB_Event_B": 2490000.0, "Availability_B": 1890000.0}, {"week_end": "2025-05-18", "BB_TrialBalance_A": 2907500.0, "Availability_A": 2307500.0, "BB_Event_B": 2782500.0, "Availability_B": 2182500.0}];
+
+function money(x) {
+  const n = Number(x || 0);
+  return n.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function parseDate(s) {
+  const [y,m,d] = s.split("-").map(Number);
+  return new Date(Date.UTC(y, m-1, d));
+}
+
+function compute(asofISO, mode, includeFuture) {
+  const asof = parseDate(asofISO);
+  const data = includeFuture ? EVENTS.concat(FUTURE) : EVENTS.slice();
+  const dateField = (mode === "A") ? "gl_post_date" : "event_date";
+
+  const rows = data.filter(r => r[dateField] && (parseDate(r[dateField]) <= asof));
+
+  const invAmt = rows.filter(r => r.event_type === "CUSTOMER_INVOICE").reduce((a,r)=>a+Number(r.amount),0);
+  const payAmt = rows.filter(r => r.event_type === "CUSTOMER_PAYMENT").reduce((a,r)=>a+Number(r.amount),0);
+  const arGross = Math.max(invAmt - payAmt, 0);
+
+  const inv3pl = rows.filter(r => r.event_type === "RECEIVED_3PL").reduce((a,r)=>a+Number(r.amount),0);
+
+  const onWater = (mode==="B")
+      ? rows.filter(r => r.event_type === "ON_WATER").reduce((a,r)=>a+Number(r.amount),0)
+      : 0;
+
+  const apReserve = (mode==="B")
+      ? -rows.filter(r => r.event_type === "VENDOR_DEPOSIT_PAID").reduce((a,r)=>a+Number(r.amount),0)
+      : 0;
+
+  const arElig = arGross * AR_ADV;
+  const invElig = inv3pl * INV_ADV;
+  const onwElig = onWater * ONW_ADV;
+
+  const bb = arElig + invElig + onwElig + apReserve;
+  const avail = bb - REV;
+
+  return { arGross, arElig, inv3pl, invElig, onWater, onwElig, apReserve, bb, avail };
+}
+
+function render() {
+  const mode = window.__mode || "B";
+  const asof = document.getElementById("asof").value;
+  const includeFuture = document.getElementById("includeFuture").checked;
+
+  const out = compute(asof, mode, includeFuture);
+
+  document.getElementById("rev").textContent = money(REV);
+  document.getElementById("bb").textContent = money(out.bb);
+  document.getElementById("avail").textContent = money(out.avail);
+
+  const comp = [
+    ["Accounts Receivable", out.arGross, "85%", out.arElig],
+    ["Inventory at 3PL", out.inv3pl, "50%", out.invElig],
+    ["On Water Inventory", out.onWater, (mode==="B" ? "25%" : "—"), (mode==="B" ? out.onwElig : 0)],
+    ["Defined AP Reserve", out.apReserve, (mode==="B" ? "100%" : "—"), out.apReserve]
+  ];
+
+  const tbody = document.getElementById("components");
+  tbody.innerHTML = "";
+  comp.forEach(([name,gross,rate,elig]) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${name}</td>
+      <td class="num">${money(gross)}</td>
+      <td class="num">${rate}</td>
+      <td class="num">${money(elig)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const ltbody = document.getElementById("lags");
+  ltbody.innerHTML = "";
+  LAGS.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.component}</td>
+      <td>${r.gl_status}</td>
+      <td class="num">${r.avg_lag_days === "" ? "" : Number(r.avg_lag_days).toFixed(1)}</td>
+      <td class="num">${r.max_lag_days}</td>
+    `;
+    ltbody.appendChild(tr);
+  });
+
+  const ftbody = document.getElementById("forecast");
+  ftbody.innerHTML = "";
+  FORECAST.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.week_end}</td>
+      <td class="num">${money(r.BB_TrialBalance_A)}</td>
+      <td class="num">${money(r.Availability_A)}</td>
+      <td class="num">${money(r.BB_Event_B)}</td>
+      <td class="num">${money(r.Availability_B)}</td>
+    `;
+    ftbody.appendChild(tr);
+  });
+}
+
+// init defaults
+window.__mode = "B";
+document.getElementById("asof").value = "2025-02-23";
+
+document.getElementById("modeA").addEventListener("click", () => {
+  window.__mode = "A";
+  document.getElementById("modeA").classList.add("active");
+  document.getElementById("modeB").classList.remove("active");
+  render();
+});
+
+document.getElementById("modeB").addEventListener("click", () => {
+  window.__mode = "B";
+  document.getElementById("modeB").classList.add("active");
+  document.getElementById("modeA").classList.remove("active");
+  render();
+});
+
+document.getElementById("asof").addEventListener("change", render);
+document.getElementById("includeFuture").addEventListener("change", render);
+
+render();
+</script>
+
+</body>
+</html>

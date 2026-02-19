@@ -1,0 +1,1014 @@
+Here’s a single self-contained HTML file. Save it as `arrangement.html` and open in a browser.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sightline – Arrangement ARR-PO-1001</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    .arrangement-screen {
+      background: #0f172a;
+      min-height: 100vh;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .as-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      background: #020617;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+    }
+    .as-header-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .as-header-sub {
+      font-size: 14px;
+      font-weight: 400;
+      color: #9ca3af;
+      margin-left: 8px;
+    }
+    .as-header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .as-header-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .as-header-pill-success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+    .arrangement-main {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 340px;
+      gap: 16px;
+      height: calc(100vh - 120px);
+    }
+    @media (max-width: 1000px) {
+      .arrangement-main {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .as-column {
+        max-height: none;
+      }
+    }
+    .as-column {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .as-column-left,
+    .as-column-right,
+    .as-column-center {
+      overflow-y: auto;
+    }
+    .as-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #e5e7eb;
+    }
+    .as-section-sub {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-left: 4px;
+    }
+    .as-card {
+      background: #020617;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .as-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .as-card-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .as-card-subtitle {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .as-card-body {
+      font-size: 13px;
+    }
+    .as-timeline {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .as-timeline-item {
+      display: flex;
+      cursor: pointer;
+      padding: 8px 0;
+    }
+    .as-timeline-item + .as-timeline-item {
+      border-top: 1px solid #111827;
+    }
+    .as-timeline-item-selected {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .as-timeline-marker {
+      width: 10px;
+      margin-right: 8px;
+      position: relative;
+    }
+    .as-timeline-marker::before {
+      content: "";
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #64748b;
+      margin-top: 4px;
+    }
+    .as-timeline-item-selected .as-timeline-marker::before {
+      background: #e5e7eb;
+    }
+    .as-timeline-content {
+      flex: 1;
+    }
+    .as-timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .as-timeline-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .as-timeline-timestamp {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+    .as-timeline-description {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    .as-chip {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .as-chip-current {
+      background: rgba(59, 130, 246, 0.1);
+      color: #60a5fa;
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+    .as-chip-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+    .as-chip-done {
+      background: rgba(148, 163, 184, 0.08);
+      color: #9ca3af;
+      border-color: rgba(148, 163, 184, 0.4);
+    }
+    .as-detail-block {
+      margin-top: 10px;
+    }
+    .as-detail-block h4 {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .as-detail-item {
+      margin-bottom: 6px;
+    }
+    .as-detail-label {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .as-detail-list {
+      list-style: disc;
+      padding-left: 18px;
+      margin: 0;
+      color: #9ca3af;
+    }
+    .as-detail-list li {
+      margin-bottom: 2px;
+    }
+    .as-overall-status {
+      margin-bottom: 8px;
+    }
+    .as-overall-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    .as-invariant-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .as-invariant-item {
+      margin-bottom: 6px;
+    }
+    .as-invariant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .as-invariant-code {
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .as-invariant-detail {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+    .as-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .as-badge-pass {
+      background: rgba(34, 197, 94, 0.1);
+      color: #4ade80;
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+    .as-badge-fail {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    .as-badge-warn {
+      background: rgba(245, 158, 11, 0.1);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+    .as-button {
+      margin-top: 8px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+    .as-button:hover {
+      background: #020617;
+      border-color: #374151;
+    }
+    .as-policy-history {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid #111827;
+      font-size: 12px;
+    }
+    .as-policy-history-entry {
+      margin-bottom: 6px;
+    }
+    .as-policy-history-header {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .as-card-docs .as-card-body {
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .as-doc-group {
+      margin-bottom: 8px;
+    }
+    .as-doc-group-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .as-doc-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .as-doc-item {
+      display: flex;
+      gap: 8px;
+      padding: 4px 0;
+    }
+    .as-doc-icon {
+      font-size: 16px;
+    }
+    .as-doc-text {
+      font-size: 12px;
+    }
+    .as-doc-label {
+      font-weight: 500;
+    }
+    .as-doc-meta {
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+<div class="arrangement-screen">
+  <!-- Header -->
+  <header class="as-header">
+    <div>
+      <div class="as-header-title">
+        Arrangement ARR-PO-1001 <span class="as-header-sub">PO-1001</span>
+      </div>
+      <div class="as-header-meta">
+        <span>Vendor: ACME Lighting</span>
+        <span>Buyer: HOA-001</span>
+        <span>Value: $1,000</span>
+      </div>
+      <div class="as-header-meta" style="margin-top:4px;">
+        <span>Ship-to: WH-IND-NEW</span>
+        <span>Age: 22 days</span>
+        <span>Risk: Low (1 warning, 0 open failures)</span>
+      </div>
+    </div>
+    <div class="as-header-pill as-header-pill-success">State: PAID</div>
+  </header>
+
+  <!-- Main layout -->
+  <div class="arrangement-main">
+    <!-- Left column: state timeline -->
+    <aside class="as-column as-column-left">
+      <h3 class="as-section-title">State timeline</h3>
+      <ul class="as-timeline" id="timeline">
+        <!-- Items (data-state-version used by JS) -->
+        <li class="as-timeline-item" data-state-version="8">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">PAID</span>
+              <span class="as-chip as-chip-current">Current</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-27 09:30</div>
+            <div class="as-timeline-description">
+              Payment PMT-9001 settled. All invariants PASS (1 warning in history).
+            </div>
+          </div>
+        </li>
+
+        <li class="as-timeline-item" data-state-version="7">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">READY_TO_PAY</span>
+              <span class="as-chip as-chip-done">Done</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-25 13:00</div>
+            <div class="as-timeline-description">
+              Full receipt 100/100 units. Invoice INV-002 (100 units @ $10).
+            </div>
+          </div>
+        </li>
+
+        <li class="as-timeline-item" data-state-version="6">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">INVOICED_AWAIT_RCVD</span>
+              <span class="as-chip as-chip-done">Done</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-24 16:00</div>
+            <div class="as-timeline-description">
+              Revised invoice INV-002 received (100 units). Qty mismatch cleared.
+            </div>
+          </div>
+        </li>
+
+        <li class="as-timeline-item" data-state-version="5">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">EXCEPTION</span>
+              <span class="as-chip as-chip-warning">Warn</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-22 10:00</div>
+            <div class="as-timeline-description">
+              INV-001 for 110 units with only 60 received. 2 invariants FAILED.
+            </div>
+          </div>
+        </li>
+
+        <li class="as-timeline-item" data-state-version="4">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">PARTIALLY_RCVD</span>
+              <span class="as-chip as-chip-done">Done</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-20 14:00</div>
+            <div class="as-timeline-description">
+              Receipt ASN-5001: 60 units @ WH-IND-NEW.
+            </div>
+          </div>
+        </li>
+
+        <li class="as-timeline-item" data-state-version="3">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">ACKED (Ship-to changed)</span>
+              <span class="as-chip as-chip-warning">Warn</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-10 11:00</div>
+            <div class="as-timeline-description">
+              Vendor ACK at WH-IND-OLD. Ship-to changed to WH-IND-NEW (WARN).
+            </div>
+          </div>
+        </li>
+
+        <li class="as-timeline-item" data-state-version="2">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">ACKED</span>
+              <span class="as-chip as-chip-done">Done</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-06 09:00</div>
+            <div class="as-timeline-description">
+              Vendor acknowledged PO-1001.
+            </div>
+          </div>
+        </li>
+
+        <li class="as-timeline-item" data-state-version="1">
+          <div class="as-timeline-marker"></div>
+          <div class="as-timeline-content">
+            <div class="as-timeline-header">
+              <span class="as-timeline-title">PO_CREATED</span>
+              <span class="as-chip as-chip-done">Done</span>
+            </div>
+            <div class="as-timeline-timestamp">2025-01-05 10:00</div>
+            <div class="as-timeline-description">
+              PO-1001: 100 units @ $10 (ship-to: WH-IND-OLD).
+            </div>
+          </div>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Center column: state details -->
+    <section class="as-column as-column-center">
+      <h3 class="as-section-title">
+        State details –
+        <span id="state-title-label">PAID</span>
+        <span class="as-section-sub">(version <span id="state-version-label">8</span>)</span>
+      </h3>
+
+      <div class="as-card">
+        <div class="as-card-header">
+          <div>
+            <div class="as-card-title" id="state-header-title">State: PAID</div>
+            <div class="as-card-subtitle" id="state-header-timestamp">2025-01-27 09:30</div>
+          </div>
+        </div>
+        <div class="as-card-body">
+          <div class="as-detail-block">
+            <h4>Triggering events</h4>
+            <div id="triggering-events-container"></div>
+          </div>
+
+          <div class="as-detail-block">
+            <h4>Context snapshot</h4>
+            <ul class="as-detail-list" id="context-list"></ul>
+          </div>
+
+          <div class="as-detail-block">
+            <h4>Resulting state</h4>
+            <ul class="as-detail-list" id="result-list"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right column: policy + documents -->
+    <aside class="as-column as-column-right">
+      <!-- Policy status -->
+      <div class="as-card">
+        <div class="as-card-header">
+          <div>
+            <div class="as-card-title">Policy status</div>
+            <div class="as-card-subtitle">State: PAID</div>
+          </div>
+        </div>
+        <div class="as-card-body">
+          <div class="as-overall-status">
+            <div>All critical checks passed</div>
+            <div class="as-overall-meta">
+              <span>Open failures: 0</span>
+              <span>Historical warnings: 1</span>
+            </div>
+          </div>
+
+          <div class="as-detail-block">
+            <h4>Key invariants</h4>
+            <ul class="as-invariant-list">
+              <li class="as-invariant-item">
+                <div class="as-invariant-header">
+                  <span class="as-invariant-code">INV_NO_PAY_WITHOUT_FULL_RECEIPT</span>
+                  <span class="as-badge as-badge-pass">PASS</span>
+                </div>
+                <div class="as-invariant-detail">
+                  Full receipt: 100 units; Invoice: 100 units (INV-002).
+                </div>
+              </li>
+              <li class="as-invariant-item">
+                <div class="as-invariant-header">
+                  <span class="as-invariant-code">INV_QTY_GT_PO</span>
+                  <span class="as-badge as-badge-pass">PASS</span>
+                </div>
+                <div class="as-invariant-detail">
+                  Invoice qty: 100; PO qty: 100.
+                </div>
+              </li>
+              <li class="as-invariant-item">
+                <div class="as-invariant-header">
+                  <span class="as-invariant-code">INV_SHIP_TO_CHANGED_AFTER_ACK</span>
+                  <span class="as-badge as-badge-warn">WARN</span>
+                </div>
+                <div class="as-invariant-detail">
+                  Old: WH-IND-OLD; New: WH-IND-NEW. Logged 2025-01-10 11:01.
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <button type="button" class="as-button" id="toggle-history-btn">
+            View decision history
+          </button>
+
+          <div class="as-policy-history" id="policy-history" style="display:none;">
+            <div class="as-policy-history-entry">
+              <div class="as-policy-history-header">
+                v3 – ACKED (Ship-to changed)
+              </div>
+              <ul class="as-detail-list">
+                <li><strong>INV_SHIP_TO_CHANGED_AFTER_ACK</strong>: WARN – 3PL change approved by Ops – Melanie, 2025-01-10</li>
+              </ul>
+            </div>
+            <div class="as-policy-history-entry">
+              <div class="as-policy-history-header">
+                v5 – EXCEPTION
+              </div>
+              <ul class="as-detail-list">
+                <li><strong>INV_QTY_GT_PO</strong>: FAIL – Invoice 110 vs PO 100.</li>
+                <li><strong>INV_NO_PAY_WITHOUT_FULL_RECEIPT</strong>: FAIL – Received 60 vs invoiced 110.</li>
+              </ul>
+            </div>
+            <div class="as-policy-history-entry">
+              <div class="as-policy-history-header">
+                v6 – INVOICED_AWAIT_RCVD
+              </div>
+              <ul class="as-detail-list">
+                <li><strong>INV_QTY_GT_PO</strong>: PASS – Revised invoice 100 vs PO 100.</li>
+              </ul>
+            </div>
+            <div class="as-policy-history-entry">
+              <div class="as-policy-history-header">
+                v7 – READY_TO_PAY
+              </div>
+              <ul class="as-detail-list">
+                <li><strong>INV_NO_PAY_WITHOUT_FULL_RECEIPT</strong>: PASS – Received 100 vs invoiced 100.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div class="as-card as-card-docs">
+        <div class="as-card-header">
+          <div>
+            <div class="as-card-title">Documents & evidence</div>
+          </div>
+        </div>
+        <div class="as-card-body">
+          <div class="as-doc-group">
+            <div class="as-doc-group-title">PO & Contract</div>
+            <ul class="as-doc-list">
+              <li class="as-doc-item">
+                <span class="as-doc-icon">📄</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">PO-1001.pdf</div>
+                  <div class="as-doc-meta">100 units @ $10 • Ship-to (original): WH-IND-OLD</div>
+                </div>
+              </li>
+              <li class="as-doc-item">
+                <span class="as-doc-icon">📄</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">Vendor contract – ACME_MASTER_2024.pdf</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="as-doc-group">
+            <div class="as-doc-group-title">Ship-to Change</div>
+            <ul class="as-doc-list">
+              <li class="as-doc-item">
+                <span class="as-doc-icon">📝</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">Change request CR-2025-01-10</div>
+                  <div class="as-doc-meta">WH-IND-OLD → WH-IND-NEW • Approved by Melanie</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="as-doc-group">
+            <div class="as-doc-group-title">Receipts</div>
+            <ul class="as-doc-list">
+              <li class="as-doc-item">
+                <span class="as-doc-icon">📦</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">ASN-5001</div>
+                  <div class="as-doc-meta">60 units @ WH-IND-NEW • 2025-01-20</div>
+                </div>
+              </li>
+              <li class="as-doc-item">
+                <span class="as-doc-icon">📦</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">ASN-5002</div>
+                  <div class="as-doc-meta">40 units @ WH-IND-NEW • 2025-01-25</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="as-doc-group">
+            <div class="as-doc-group-title">Invoices</div>
+            <ul class="as-doc-list">
+              <li class="as-doc-item">
+                <span class="as-doc-icon">🧾</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">INV-001</div>
+                  <div class="as-doc-meta">110 units • 2025-01-22 • Status: Superseded</div>
+                </div>
+              </li>
+              <li class="as-doc-item">
+                <span class="as-doc-icon">🧾</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">INV-002</div>
+                  <div class="as-doc-meta">100 units • 2025-01-24 • Status: Active</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="as-doc-group">
+            <div class="as-doc-group-title">Payments</div>
+            <ul class="as-doc-list">
+              <li class="as-doc-item">
+                <span class="as-doc-icon">💸</span>
+                <div class="as-doc-text">
+                  <div class="as-doc-label">PMT-9001</div>
+                  <div class="as-doc-meta">Amount: $1,000 • 2025-01-27 09:30</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  // Simple data for the center panel per stateVersion
+  const STATE_DETAILS = {
+    1: {
+      title: "PO_CREATED",
+      version: 1,
+      timestamp: "2025-01-05 10:00",
+      triggering: [
+        {
+          label: "po_created (PO-1001)",
+          lines: [
+            "Source: ERP",
+            "Quantity: 100 units",
+            "Unit price: $10",
+            "Ship-to: WH-IND-OLD"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 0 units",
+        "Ship-to: WH-IND-OLD"
+      ],
+      result: [
+        "Previous state: (none)",
+        "New state: PO_CREATED",
+        "Reason: New purchase order created"
+      ]
+    },
+    2: {
+      title: "ACKED",
+      version: 2,
+      timestamp: "2025-01-06 09:00",
+      triggering: [
+        {
+          label: "po_acknowledged (PO-1001)",
+          lines: [
+            "Source: VENDOR_PORTAL",
+            "Vendor: ACME Lighting"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 0 units",
+        "Ship-to at ACK: WH-IND-OLD"
+      ],
+      result: [
+        "Previous state: PO_CREATED",
+        "New state: ACKED",
+        "Reason: Vendor acknowledged PO"
+      ]
+    },
+    3: {
+      title: "ACKED (Ship-to changed)",
+      version: 3,
+      timestamp: "2025-01-10 11:00",
+      triggering: [
+        {
+          label: "po_updated_ship_to (PO-1001)",
+          lines: [
+            "Source: ERP",
+            "Old ship-to: WH-IND-OLD",
+            "New ship-to: WH-IND-NEW"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 0 units",
+        "Ship-to at ACK: WH-IND-OLD",
+        "Current ship-to: WH-IND-NEW"
+      ],
+      result: [
+        "Previous state: ACKED",
+        "New state: ACKED (Ship-to changed)",
+        "Reason: Ship-to changed after vendor ACK (policy WARN)"
+      ]
+    },
+    4: {
+      title: "PARTIALLY_RCVD",
+      version: 4,
+      timestamp: "2025-01-20 14:00",
+      triggering: [
+        {
+          label: "shipment_received (ASN-5001)",
+          lines: [
+            "Source: 3PL",
+            "Quantity: 60 units",
+            "Location: WH-IND-NEW"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 60 / 100 units",
+        "Ship-to: WH-IND-NEW"
+      ],
+      result: [
+        "Previous state: ACKED (Ship-to changed)",
+        "New state: PARTIALLY_RCVD",
+        "Reason: First partial receipt recorded"
+      ]
+    },
+    5: {
+      title: "EXCEPTION",
+      version: 5,
+      timestamp: "2025-01-22 10:00",
+      triggering: [
+        {
+          label: "invoice_received (INV-001)",
+          lines: [
+            "Source: AP",
+            "Quantity: 110 units",
+            "Unit price: $10",
+            "Amount: $1,100",
+            "Terms: Net 30"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 60 units",
+        "Ship-to (current): WH-IND-NEW",
+        "Ship-to at ACK: WH-IND-OLD"
+      ],
+      result: [
+        "Previous state: PARTIALLY_RCVD",
+        "New state: EXCEPTION",
+        "Reason: Quantity mismatch and incomplete receipt (2 invariants FAIL)"
+      ]
+    },
+    6: {
+      title: "INVOICED_AWAIT_RCVD",
+      version: 6,
+      timestamp: "2025-01-24 16:00",
+      triggering: [
+        {
+          label: "invoice_revised (INV-002)",
+          lines: [
+            "Source: AP",
+            "Quantity: 100 units",
+            "Unit price: $10",
+            "Amount: $1,000"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 60 units",
+        "Latest invoice: 100 units (INV-002)",
+        "Open violations: 1 (awaiting full receipt)"
+      ],
+      result: [
+        "Previous state: EXCEPTION",
+        "New state: INVOICED_AWAIT_RCVD",
+        "Reason: Quantity mismatch cleared, waiting on remaining receipt"
+      ]
+    },
+    7: {
+      title: "READY_TO_PAY",
+      version: 7,
+      timestamp: "2025-01-25 13:00",
+      triggering: [
+        {
+          label: "shipment_received (ASN-5002)",
+          lines: [
+            "Source: 3PL",
+            "Quantity: 40 units",
+            "Location: WH-IND-NEW"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 100 / 100 units",
+        "Latest invoice: INV-002 (100 units @ $10)",
+        "Open violations: 0 (all cleared)"
+      ],
+      result: [
+        "Previous state: INVOICED_AWAIT_RCVD",
+        "New state: READY_TO_PAY",
+        "Reason: Full receipt matched to invoice and PO"
+      ]
+    },
+    8: {
+      title: "PAID",
+      version: 8,
+      timestamp: "2025-01-27 09:30",
+      triggering: [
+        {
+          label: "payment_settled (PMT-9001)",
+          lines: [
+            "Source: BANK",
+            "Amount: $1,000",
+            "Method: ACH"
+          ]
+        }
+      ],
+      context: [
+        "PO quantity: 100 units",
+        "Total received: 100 / 100 units",
+        "Invoice INV-002: 100 units @ $10",
+        "All critical invariants: PASS"
+      ],
+      result: [
+        "Previous state: READY_TO_PAY",
+        "New state: PAID",
+        "Reason: Payment executed after all checks passed"
+      ]
+    }
+  };
+
+  function renderState(version) {
+    const detail = STATE_DETAILS[version] || STATE_DETAILS[8];
+
+    document.getElementById("state-title-label").textContent = detail.title;
+    document.getElementById("state-version-label").textContent = detail.version;
+    document.getElementById("state-header-title").textContent = "State: " + detail.title;
+    document.getElementById("state-header-timestamp").textContent = detail.timestamp;
+
+    const triggeringContainer = document.getElementById("triggering-events-container");
+    triggeringContainer.innerHTML = "";
+    detail.triggering.forEach(ev => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "as-detail-item";
+      const label = document.createElement("div");
+      label.className = "as-detail-label";
+      label.textContent = ev.label;
+      const ul = document.createElement("ul");
+      ul.className = "as-detail-list";
+      ev.lines.forEach(line => {
+        const li = document.createElement("li");
+        li.textContent = line;
+        ul.appendChild(li);
+      });
+      wrapper.appendChild(label);
+      wrapper.appendChild(ul);
+      triggeringContainer.appendChild(wrapper);
+    });
+
+    const contextList = document.getElementById("context-list");
+    contextList.innerHTML = "";
+    detail.context.forEach(line => {
+      const li = document.createElement("li");
+      li.textContent = line;
+      contextList.appendChild(li);
+    });
+
+    const resultList = document.getElementById("result-list");
+    resultList.innerHTML = "";
+    detail.result.forEach(line => {
+      const li = document.createElement("li");
+      li.textContent = line;
+      resultList.appendChild(li);
+    });
+  }
+
+  function setupTimeline() {
+    const timeline = document.getElementById("timeline");
+    const items = timeline.querySelectorAll(".as-timeline-item");
+
+    items.forEach(item => {
+      item.addEventListener("click", () => {
+        items.forEach(i => i.classList.remove("as-timeline-item-selected"));
+        item.classList.add("as-timeline-item-selected");
+        const version = parseInt(item.getAttribute("data-state-version"), 10);
+        renderState(version);
+      });
+    });
+
+    // default selection: PAID (version 8)
+    const defaultItem = timeline.querySelector('[data-state-version="8"]');
+    if (defaultItem) {
+      defaultItem.classList.add("as-timeline-item-selected");
+      renderState(8);
+    }
+  }
+
+  function setupPolicyToggle() {
+    const btn = document.getElementById("toggle-history-btn");
+    const history = document.getElementById("policy-history");
+    btn.addEventListener("click", () => {
+      const visible = history.style.display === "block";
+      history.style.display = visible ? "none" : "block";
+      btn.textContent = visible ? "View decision history" : "Hide decision history";
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setupTimeline();
+    setupPolicyToggle();
+  });
+</script>
+</body>
+</html>
+```

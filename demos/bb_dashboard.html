@@ -1,0 +1,34 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Borrowing Base Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { font-family: Arial, sans-serif; margin: 20px; }
+h1 { color: #333; }
+table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th { background: #f2f2f2; }
+.summary { font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>Borrowing Base – Event Driven Demo</h1>
+
+<h2>Event Stream</h2>
+<p>Source file: bb_events.csv</p>
+
+<h2>Borrowing Base Snapshot</h2>
+<table>
+<tr><th>Component</th><th>Gross</th><th>Advance Rate</th><th>Eligible</th></tr>
+<tr><td>Accounts Receivable</td><td>500,000</td><td>85%</td><td>425,000</td></tr>
+<tr><td>Inventory at 3PL</td><td>700,000</td><td>50%</td><td>350,000</td></tr>
+<tr><td>On Water Inventory</td><td>700,000</td><td>25%</td><td>175,000</td></tr>
+<tr><td>Defined AP Reserve</td><td>-300,000</td><td>100%</td><td>-300,000</td></tr>
+<tr class="summary"><td>Total Borrowing Base</td><td></td><td></td><td>650,000</td></tr>
+</table>
+
+<p>This view reflects liquidity as events occur, not when the GL closes.</p>
+</body>
+</html>

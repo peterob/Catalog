@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sightline Architecture Diagram</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .description {
+            max-width: 800px;
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .diagram-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 100%;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>The Physics of Financial Coordination</h1>
+    <p class="description">
+        This diagram illustrates the transition from the "Old World" of siloed ERPs to the "Sightline Engine." 
+        It visualizes how <strong>Standard Functions</strong> act as deterministic physics to transform 
+        <strong>Inputs (Matter)</strong> into <strong>Outputs (New Matter)</strong>, updating a shared 
+        <strong>Global State (The Board)</strong>.
+    </p>
+
+    <div class="diagram-container">
+        <div class="mermaid">
+            graph TD
+                %% SUBGRAPH: THE OLD WORLD
+                subgraph Old_World ["The Old World: The N-Body Problem"]
+                    style Old_World fill:#f9f9f9,stroke:#999,stroke-width:2px,stroke-dasharray: 5 5
+                    Buyer_ERP[("Buyer ERP<br/>(Siloed View)")]
+                    Supplier_ERP[("Supplier ERP<br/>(Siloed View)")]
+                    Lender_Spreadsheet[("Lender Excel<br/>(Siloed View)")]
+                    
+                    Buyer_ERP <-->|Email/PDF| Supplier_ERP
+                    Supplier_ERP <-->|Phone Call| Lender_Spreadsheet
+                    Lender_Spreadsheet <-->|Audit| Buyer_ERP
+                end
+
+                %% SUBGRAPH: THE SIGHTLINE ENGINE
+                subgraph Sightline_Engine ["The Sightline Engine: Explained with "The Physics Model""]
+                    style Sightline_Engine fill:#e6f3ff,stroke:#333,stroke-width:2px
+
+                    %% LAYER 1: THE INPUTS (MATTER)
+                    subgraph Inputs ["1. The Inputs (Existing Matter)"]
+                        style Inputs fill:#fff,stroke:#666
+                        Input_Cash[("Tensor: Cash<br/>$75k<br/>(Unspent)")]:::tensor
+                        Input_PO[("Tensor: PO #101<br/>Deposit Due<br/>(Active)")]:::tensor
+                    end
+
+                    %% LAYER 2: THE MOVE (EVENT)
+                    subgraph The_Event ["2. The Move (Strong Event)"]
+                        style The_Event fill:#fff,stroke:#333,stroke-width:4px
+                        Logic_Box{{"Standard Function:<br/>Payment Application"}}:::logic
+                        
+                        Input_Cash --> Logic_Box
+                        Input_PO --> Logic_Box
+                        
+                        note1[("The Rulebook:<br/>Checks Valid Linkage<br/>Checks Value Conservation")]:::note
+                        Logic_Box -.- note1
+                    end
+
+                    %% LAYER 3: THE OUTPUTS (NEW MATTER)
+                    subgraph Outputs ["3. The Outputs (New Matter)"]
+                        style Outputs fill:#fff,stroke:#666
+                        Output_Receipt[("Tensor: Receipt<br/>Owner: Supplier<br/>(Unspent)")]:::newtensor
+                        Output_PaidPO[("Tensor: PO #101<br/>Status: Paid<br/>(Unspent)")]:::newtensor
+                    end
+
+                    %% LAYER 4: THE BOARD (STATE)
+                    subgraph The_Board ["4. The Board (Shared State / Density)"]
+                        style The_Board fill:#d9d2e9,stroke:#664ea0
+                        State_Store[("Global UTXO Set<br/>(The Single Source of Truth)")]
+                    end
+                end
+
+                %% CONNECTIONS
+                Old_World -.->|Replaced By| Sightline_Engine
+                Logic_Box ==>|Creates| Outputs
+                Logic_Box ==>|Consumes| Inputs
+                Outputs ==>|Updates| State_Store
+                
+                %% STYLING
+                classDef tensor fill:#ffdfba,stroke:#d79b00,stroke-width:2px;
+                classDef newtensor fill:#c2e0c6,stroke:#38761d,stroke-width:2px;
+                classDef logic fill:#ffcccc,stroke:#cc0000,stroke-width:2px,rx:5,ry:5;
+                classDef note fill:#ffffcc,stroke:#d6d600,stroke-dasharray: 5 5;
+        </div>
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sightline Event Ledger: 4D-FR Schema</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #1a202c;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2d3748;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #4a5568;
+            margin-top: 25px;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .note {
+            background-color: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #1e1e1e; /* VS Code Dark style */
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        /* Simple Syntax Highlighting Simulation */
+        .sql-keyword { color: #569cd6; font-weight: bold; }
+        .sql-string { color: #ce9178; }
+        .sql-comment { color: #6a9955; font-style: italic; }
+        .sql-func { color: #dcdcaa; }
+        .sql-type { color: #4ec9b0; }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.9em;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sightline Event Ledger: 4D-FR Architecture</h1>
+    
+    <div class="note">
+        <strong>Overview:</strong> This schema implements the <em>Four-Dimensional Frame of Reference (4D-FR)</em>. 
+        It treats the ledger as a <strong>Cartesian Database</strong> where every transaction is an atomic vector: 
+        <code>(Flow, Action, Tail, Head)</code>. It includes a "Physics Engine" to prevent fraud by enforcing 
+        topological validity (structural coupling).
+    </div>
+
+    <h2>1. The Lexica (Nodes & Edges)</h2>
+    <p>Defining the valid Nouns (Accounts) and Verbs (Actions) of the system.</p>
+
+    <pre><code><span class="sql-comment">-- 1. ACCOUNTS (The Nodes)</span>
+<span class="sql-keyword">CREATE TABLE</span> Accounts (
+    account_id <span class="sql-type">INT PRIMARY KEY</span>,
+    account_name <span class="sql-type">VARCHAR(100) NOT NULL</span>, <span class="sql-comment">-- e.g., "Nvidia H100 Inventory"</span>
+    
+    <span class="sql-comment">-- "Class" defines the network: 'Physical' (Assets) or 'Financial' (Money)</span>
+    <span class="sql-comment">-- This supports the "Structural Coupling" requirement</span>
+    network_type <span class="sql-type">VARCHAR(20) CHECK</span> (network_type <span class="sql-keyword">IN</span> (<span class="sql-string">'PHYSICAL'</span>, <span class="sql-string">'FINANCIAL'</span>, <span class="sql-string">'BOUNDARY'</span>))
+);
+
+<span class="sql-comment">-- 2. ACTIONS (The Edges)</span>
+<span class="sql-comment">-- Captures the "Why". This is the 4th dimension missing in standard GAAP.</span>
+<span class="sql-keyword">CREATE TABLE</span> Actions (
+    action_id <span class="sql-type">INT PRIMARY KEY</span>,
+    action_name <span class="sql-type">VARCHAR(50) NOT NULL</span>, <span class="sql-comment">-- e.g., "Expenditure", "Payment", "Shipping"</span>
+    
+    <span class="sql-comment">-- Defines if this action moves Goods (Irreversible) or Money (Reversible)</span>
+    action_type <span class="sql-type">VARCHAR(20) CHECK</span> (action_type <span class="sql-keyword">IN</span> (<span class="sql-string">'PHYSICAL_FLOW'</span>, <span class="sql-string">'CASH_FLOW'</span>, <span class="sql-string">'COUPLING'</span>))
+);</code></pre>
+
+    <h2>2. The Physics Engine (Topology Rules)</h2>
+    <p>This table acts as the configuration for valid business logic. It dictates which edges can connect which nodes.</p>
+
+    <pre><code><span class="sql-comment">-- 3. TOPOLOGY_RULES (The "Physics" Logic)</span>
+<span class="sql-keyword">CREATE TABLE</span> Topology_Rules (
+    rule_id <span class="sql-type">INT PRIMARY KEY</span>,
+    action_id <span class="sql-type">INT REFERENCES</span> Actions(action_id),
+    allowed_tail_type <span class="sql-type">VARCHAR(20)</span>, <span class="sql-comment">-- Source Network Type</span>
+    allowed_head_type <span class="sql-type">VARCHAR(20)</span>, <span class="sql-comment">-- Destination Network Type</span>
+    
+    description <span class="sql-type">VARCHAR(255)</span>
+);
+
+<span class="sql-comment">-- Seeding the Rules:</span>
+<span class="sql-keyword">INSERT INTO</span> Topology_Rules (action_id, allowed_tail_type, allowed_head_type, description)
+<span class="sql-keyword">VALUES</span> 
+    <span class="sql-comment">-- Rule 1: A "Payment" must flow from Financial Cash -> Boundary Liability</span>
+    (101, <span class="sql-string">'FINANCIAL'</span>, <span class="sql-string">'BOUNDARY'</span>, <span class="sql-string">'Paying off debt'</span>),
+    
+    <span class="sql-comment">-- Rule 2: An "Expenditure" must flow from Boundary Liability -> Physical Asset</span>
+    (201, <span class="sql-string">'BOUNDARY'</span>, <span class="sql-string">'PHYSICAL'</span>, <span class="sql-string">'Acquiring physical inventory on credit'</span>);
+    
+    <span class="sql-comment">-- NOTE: There is NO rule allowing Cash -> Physical Asset directly.</span>
+    <span class="sql-comment">-- This prevents the "Shortcut Entry" fraud.</span></code></pre>
+
+    <h2>3. The Event Ledger (4D Transactions)</h2>
+    <p>The core table replacing the General Ledger.</p>
+
+    <pre><code><span class="sql-comment">-- 4. EVENT_LEDGER_4D (The Cartesian Database)</span>
+<span class="sql-keyword">CREATE TABLE</span> Event_Ledger (
+    event_id <span class="sql-type">UUID PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    event_date <span class="sql-type">TIMESTAMP DEFAULT</span> NOW(),
+    
+    <span class="sql-comment">-- The 4 Dimensions</span>
+    flow_amount <span class="sql-type">DECIMAL(18, 2) NOT NULL</span>,  <span class="sql-comment">-- 1: Flow (Quantitative)</span>
+    action_id <span class="sql-type">INT REFERENCES</span> Actions(action_id), <span class="sql-comment">-- 2: Action (Cause)</span>
+    tail_account_id <span class="sql-type">INT REFERENCES</span> Accounts(account_id), <span class="sql-comment">-- 3: Tail (Source)</span>
+    head_account_id <span class="sql-type">INT REFERENCES</span> Accounts(account_id), <span class="sql-comment">-- 4: Head (Destination)</span>
+
+    <span class="sql-comment">-- Metadata for Drill-Down (Compositionality)</span>
+    unit_type <span class="sql-type">VARCHAR(20)</span>, <span class="sql-comment">-- e.g., 'USD', 'GPU_UNIT', 'KG'</span>
+    sku_reference <span class="sql-type">VARCHAR(50)</span> <span class="sql-comment">-- Links to the specific physical object</span>
+);</code></pre>
+
+    <h2>4. The Validator (Fraud Prevention)</h2>
+    <p>A SQL Trigger that rejects any transaction violating the topological rules.</p>
+
+    <pre><code><span class="sql-keyword">CREATE OR REPLACE FUNCTION</span> validate_topology() 
+<span class="sql-keyword">RETURNS TRIGGER AS</span> $$
+<span class="sql-keyword">DECLARE</span>
+    tail_net <span class="sql-type">VARCHAR(20)</span>;
+    head_net <span class="sql-type">VARCHAR(20)</span>;
+    is_valid <span class="sql-type">BOOLEAN</span>;
+<span class="sql-keyword">BEGIN</span>
+    <span class="sql-comment">-- 1. Get the Network Type of the Tail and Head accounts</span>
+    <span class="sql-keyword">SELECT</span> network_type <span class="sql-keyword">INTO</span> tail_net <span class="sql-keyword">FROM</span> Accounts <span class="sql-keyword">WHERE</span> account_id = NEW.tail_account_id;
+    <span class="sql-keyword">SELECT</span> network_type <span class="sql-keyword">INTO</span> head_net <span class="sql-keyword">FROM</span> Accounts <span class="sql-keyword">WHERE</span> account_id = NEW.head_account_id;
+
+    <span class="sql-comment">-- 2. Check if this specific Action is allowed to connect these two Network Types</span>
+    <span class="sql-keyword">SELECT EXISTS</span> (
+        <span class="sql-keyword">SELECT</span> 1 <span class="sql-keyword">FROM</span> Topology_Rules 
+        <span class="sql-keyword">WHERE</span> action_id = NEW.action_id
+        <span class="sql-keyword">AND</span> allowed_tail_type = tail_net
+        <span class="sql-keyword">AND</span> allowed_head_type = head_net
+    ) <span class="sql-keyword">INTO</span> is_valid;
+
+    <span class="sql-comment">-- 3. Reject if no rule exists (The "Physics" Violation)</span>
+    <span class="sql-keyword">IF NOT</span> is_valid <span class="sql-keyword">THEN</span>
+        <span class="sql-keyword">RAISE EXCEPTION</span> <span class="sql-string">'Topology Violation: Action % cannot connect % to %.'</span>, 
+            NEW.action_id, tail_net, head_net;
+    <span class="sql-keyword">END IF</span>;
+
+    <span class="sql-keyword">RETURN</span> NEW;
+<span class="sql-keyword">END</span>;
+$$ <span class="sql-keyword">LANGUAGE</span> plpgsql;
+
+<span class="sql-keyword">CREATE TRIGGER</span> check_topology_before_insert
+<span class="sql-keyword">BEFORE INSERT ON</span> Event_Ledger
+<span class="sql-keyword">FOR EACH ROW EXECUTE FUNCTION</span> validate_topology();</code></pre>
+
+    <h2>5. Test Cases: GPU Procurement</h2>
+
+    <h3>Scenario A: Valid Transaction (Structural Coupling)</h3>
+    <pre><code><span class="sql-comment">-- Step 1: Physical Inflow (Goods arrive, Debt created)</span>
+<span class="sql-comment">-- Action 201 (Expenditure) connects Boundary -> Physical</span>
+<span class="sql-keyword">INSERT INTO</span> Event_Ledger (flow_amount, action_id, tail_account_id, head_account_id, unit_type)
+<span class="sql-keyword">VALUES</span> (250000.00, 201, 30, 20, <span class="sql-string">'USD'</span>); 
+
+<span class="sql-comment">-- Step 2: Financial Outflow (Cash leaves, Debt settled)</span>
+<span class="sql-comment">-- Action 101 (Payment) connects Financial -> Boundary</span>
+<span class="sql-keyword">INSERT INTO</span> Event_Ledger (flow_amount, action_id, tail_account_id, head_account_id, unit_type)
+<span class="sql-keyword">VALUES</span> (250000.00, 101, 10, 30, <span class="sql-string">'USD'</span>); 
+
+<span class="sql-comment">-- RESULT: SUCCESS (Both transactions accepted)</span></code></pre>
+
+    <h3>Scenario B: Fraud Attempt (Phantom Asset)</h3>
+    <pre><code><span class="sql-comment">-- Attempt: Direct Cash -> Inventory (Skipping Liability/Payables)</span>
+<span class="sql-comment">-- This attempts to connect Financial -> Physical directly.</span>
+<span class="sql-keyword">INSERT INTO</span> Event_Ledger (flow_amount, action_id, tail_account_id, head_account_id)
+<span class="sql-keyword">VALUES</span> (50000.00, 201, 10, 20); 
+
+<span class="sql-comment">-- RESULT: ERROR: Topology Violation.</span>
+<span class="sql-comment">-- Action 201 (Expenditure) cannot connect FINANCIAL (Cash) to PHYSICAL (Inventory).</span></code></pre>
+
+    <div class="footer">
+        Generated for Sightline Architecture Planning | Based on "The Network Properties of Economic Events"
+    </div>
+
+</body>
+</html>

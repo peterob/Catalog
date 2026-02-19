@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sightline | Inter-Enterprise Ledger</title>
+    <style>
+        /* --- DESIGN TOKENS --- */
+        :root {
+            --bg-deep: #0F1115;
+            --bg-panel: #16181D;
+            --border: #2A2F3A;
+            --text-primary: #E0E0E0;
+            --text-muted: #6B7280;
+            --cyan: #00F0FF;
+            --green: #00FF41;
+            --red: #FF3333;
+            --amber: #FFC107;
+            --font-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+
+        /* --- RESET & BASE --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: border 0.3s;
+            border: 4px solid transparent;
+        }
+        
+        body.vendor-mode { border-color: var(--amber); }
+
+        /* --- HEADER --- */
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: rgba(15, 17, 21, 0.95);
+        }
+
+        h1 { font-family: var(--font-sans); font-weight: 800; letter-spacing: -0.05em; font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+        .role-switch {
+            display: flex;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            width: fit-content;
+            cursor: pointer;
+        }
+        .role-btn {
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            font-family: var(--font-sans);
+            font-weight: 600;
+        }
+        .role-btn:hover { background: #222; }
+        .role-btn.active.buyer { background: var(--bg-panel); border-bottom: 2px solid var(--cyan); color: var(--cyan); }
+        .role-btn.active.vendor { background: var(--bg-panel); border-bottom: 2px solid var(--amber); color: var(--amber); }
+
+        .metric-group { text-align: right; }
+        .value-lg { font-family: var(--font-sans); font-size: 2.5rem; font-weight: 700; letter-spacing: -0.05em; line-height: 1; }
+        .label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 4px; }
+        .status-pill { font-size: 0.6rem; padding: 2px 6px; border: 1px solid var(--border); border-radius: 4px; display: inline-block; margin-top: 6px; }
+
+        /* --- SLIDER AREA --- */
+        .slider-container { padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: var(--bg-panel); }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: var(--cyan); }
+        .slider-meta { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+
+        /* --- TABLE --- */
+        .table-header, .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 3fr 1fr 1fr;
+            padding: 0.75rem 2rem;
+            font-size: 0.8rem;
+            align-items: center;
+        }
+        .table-header { background: var(--bg-deep); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; font-weight: 700; color: var(--text-muted); }
+        .table-row { border-bottom: 1px solid #1f232b; transition: background 0.1s; }
+        .table-row:hover { background-color: var(--bg-panel); }
+        .table-scroll { overflow-y: auto; flex: 1; }
+
+        /* --- CONTROLS --- */
+        .controls { position: absolute; bottom: 2rem; right: 2rem; display: flex; gap: 1rem; }
+        button {
+            background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-primary);
+            font-family: var(--font-mono); padding: 0.75rem 1.5rem; cursor: pointer; text-transform: uppercase; font-weight: 700; font-size: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        button:active { transform: translateY(1px); }
+        .btn-cyan { border-color: var(--cyan); color: var(--cyan); }
+        .btn-cyan:hover { background: var(--cyan); color: black; }
+        .btn-green { border-color: var(--green); color: var(--green); }
+        .btn-green:hover { background: var(--green); color: black; }
+        .btn-red { border-color: var(--red); color: var(--red); }
+        .btn-red:hover { background: var(--red); color: white; }
+        .btn-amber { border-color: var(--amber); color: var(--amber); }
+        .btn-amber:hover { background: var(--amber); color: black; }
+
+        /* UTILS */
+        .text-cyan { color: var(--cyan); }
+        .text-green { color: var(--green); }
+        .text-red { color: var(--red); }
+        .text-amber { color: var(--amber); }
+        .mono { font-family: var(--font-mono); }
+        .blur { filter: blur(4px); opacity: 0.5; }
+        
+        /* ANIMATIONS */
+        @keyframes flash-red { 0% {background: transparent;} 50% {background: rgba(255,51,51,0.2);} 100% {background: transparent;} }
+        .flash-error { animation: flash-red 0.4s ease-out; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1 id="app-title">SIGHTLINE<span class="text-cyan">_</span>PROTOCOL</h1>
+            <div class="role-switch">
+                <div class="role-btn active buyer" onclick="switchRole('BUYER')">INTERNAL NODE (BUYER)</div>
+                <div class="role-btn vendor" onclick="switchRole('VENDOR')">BRIDGE NODE (VENDOR)</div>
+            </div>
+        </div>
+        <div class="metric-group">
+            <div class="label" id="balance-label">Treasury State</div>
+            <div class="value-lg" id="balance-display">$0.00</div>
+            <div class="status-pill" id="ledger-status" style="color: var(--cyan); border-color: var(--cyan);">PHYSICS ENGINE: ACTIVE</div>
+        </div>
+    </header>
+
+    <div class="slider-container">
+        <div class="slider-meta label">
+            <span>GENESIS BLOCK</span>
+            <span id="slider-label" class="text-cyan">LIVE TELEMETRY</span>
+        </div>
+        <input type="range" id="time-slider" min="0" max="0" value="0" step="1">
+    </div>
+
+    <main style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+        <div class="table-header label">
+            <div>HASH PROOF</div>
+            <div>EVENT TYPE</div>
+            <div>METADATA / CONTEXT</div>
+            <div>VALIDATION</div>
+            <div style="text-align: right;">IMPACT</div>
+        </div>
+        <div class="table-scroll" id="event-list">
+            </div>
+    </main>
+
+    <div class="controls">
+        <button class="btn-cyan" onclick="downloadCSV()">[↓] Export Data</button>
+        
+        <div id="buyer-controls" style="display:flex; gap:1rem;">
+            <button class="btn-green" onclick="injectEvent('INJECT')">+ Inject Capital</button>
+            <button class="btn-red" onclick="injectEvent('SPEND')">- Spend Cash</button>
+        </div>
+        
+        <div id="vendor-controls" style="display:none; gap:1rem;">
+            <button class="btn-amber" onclick="injectEvent('INVOICE')">↑ Submit Invoice</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIG & STATE ---
+        const DEMO_VENDOR = 'AWS_CLOUD_SERVICES'; // Customizable for your demo
+        const DEMO_INVESTOR = 'SEQUOIA_CAPITAL';
+        
+        let currentRole = 'BUYER';
+        let events = [
+            { id: 1, type: 'SEED_ROUND_CLOSE', amount: 1000000, vendor: 'INTERNAL', meta: {source: DEMO_INVESTOR, wire: 'W-998'}, hash: '8f4b2e9a...', ts: '2025-12-01' },
+            { id: 2, type: 'SERVER_INFRASTRUCTURE', amount: -5000, vendor: DEMO_VENDOR, meta: {invoice: 'INV-001', region: 'us-east-1'}, hash: '7c3d1f8b...', ts: '2025-12-02' },
+            { id: 3, type: 'PAYROLL_RUN_A', amount: -45000, vendor: 'INTERNAL', meta: {run_id: 'OCT_A', headcount: 12}, hash: '9a2b3c4d...', ts: '2025-12-15' },
+            { id: 4, type: 'LOGISTICS_FEES', amount: -2500, vendor: 'FEDEX_GLOBAL', meta: {batch: 'B-292', weight: '500kg'}, hash: '1e2f3g4h...', ts: '2025-12-16' },
+        ];
+        
+        // --- 2. CORE LOGIC ---
+        const slider = document.getElementById('time-slider');
+        const list = document.getElementById('event-list');
+        const balEl = document.getElementById('balance-display');
+        let sliderValue = events.length;
+
+        function render() {
+            // A. Filter (The Security Layer)
+            let visibleEvents = events.slice(0, sliderValue);
+            
+            if (currentRole === 'VENDOR') {
+                // Vendor only sees their own transactions
+                visibleEvents = visibleEvents.filter(ev => ev.vendor === DEMO_VENDOR);
+            }
+
+            // B. Calculate Physics (The Engine)
+            const balance = visibleEvents.reduce((acc, curr) => {
+                // Buyer sees Cash Flow. Vendor sees Revenue (inverse of buyer expense).
+                if (currentRole === 'VENDOR') return acc + Math.abs(curr.amount); 
+                return acc + curr.amount;
+            }, 0);
+
+            // C. Update UI
+            // Header Balance
+            balEl.innerText = `$${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            if (currentRole === 'BUYER') {
+                balEl.style.color = balance >= 0 ? 'var(--cyan)' : 'var(--red)';
+                document.getElementById('balance-label').innerText = "Treasury State";
+            } else {
+                balEl.style.color = 'var(--amber)';
+                document.getElementById('balance-label').innerText = "Receivable Balance";
+            }
+
+            // D. Render Rows
+            list.innerHTML = '';
+            [...visibleEvents].reverse().forEach(ev => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                
+                const isPos = currentRole === 'VENDOR' ? true : ev.amount > 0;
+                const color = currentRole === 'VENDOR' ? 'var(--amber)' : (isPos ? 'var(--green)' : 'var(--red)');
+                const sign = currentRole === 'VENDOR' ? '+' : (isPos ? '+' : '');
+
+                row.innerHTML = `
+                    <div class="mono" style="color:var(--text-muted); font-size:0.7rem;">${ev.hash}</div>
+                    <div style="font-weight:700; color:#fff;">${ev.type}</div>
+                    <div style="color:var(--text-muted); font-size:0.7rem; font-family:var(--font-sans);">${JSON.stringify(ev.meta)}</div>
+                    <div style="color:${color}; font-size:0.65rem; border:1px solid ${color}; display:inline-block; width:fit-content; padding:2px 4px; border-radius:3px;">VERIFIED</div>
+                    <div style="text-align:right; font-weight:700; color:${color}; font-family:var(--font-sans);">${sign}${Math.abs(ev.amount).toLocaleString()}</div>
+                `;
+                list.appendChild(row);
+            });
+
+            // E. Slider UI
+            slider.max = events.length;
+            const isLive = sliderValue === events.length;
+            document.getElementById('slider-label').innerText = isLive ? "LIVE TELEMETRY" : `REPLAYING EVENT ${sliderValue}/${events.length}`;
+            document.getElementById('slider-label').className = isLive ? "text-cyan" : "text-amber";
+        }
+
+        // --- 3. INTERACTION HANDLERS ---
+        function switchRole(role) {
+            currentRole = role;
+            
+            // Toggle Classes
+            document.querySelector('.buyer').classList.toggle('active', role === 'BUYER');
+            document.querySelector('.vendor').classList.toggle('active', role === 'VENDOR');
+            document.body.className = role === 'BUYER' ? '' : 'vendor-mode';
+            
+            // Toggle Controls
+            document.getElementById('buyer-controls').style.display = role === 'BUYER' ? 'flex' : 'none';
+            document.getElementById('vendor-controls').style.display = role === 'BUYER' ? 'none' : 'flex';
+            
+            // Reset Slider to avoid confusion
+            sliderValue = events.length;
+            slider.value = sliderValue;
+            
+            render();
+        }
+
+        function injectEvent(action) {
+            // Safety: Block injection during replay
+            if (sliderValue !== events.length) {
+                alert("SYSTEM LOCKED: Return to Live Telemetry to inject events.");
+                return;
+            }
+
+            const ts = new Date().toISOString().split('T')[0];
+            const hash = Array(16).fill(0).map(()=>Math.random().toString(36)[2]).join('') + '...';
+
+            let newEvent = { id: events.length + 1, ts, hash };
+
+            if (action === 'INJECT') {
+                newEvent.type = 'CAPITAL_CALL';
+                newEvent.amount = 250000;
+                newEvent.vendor = 'INTERNAL';
+                newEvent.meta = {source: 'LP_WIRE_IN'};
+            } 
+            else if (action === 'SPEND') {
+                // Physics Check
+                const currentBal = events.reduce((acc, curr) => acc + curr.amount, 0);
+                if (currentBal < 10000) {
+                    document.body.classList.add('flash-error');
+                    setTimeout(()=>document.body.classList.remove('flash-error'), 400);
+                    alert("PHYSICS ENGINE: Transaction Rejected.\nInsufficient Funds for Transfer.");
+                    return;
+                }
+                newEvent.type = 'VENDOR_PAYOUT';
+                newEvent.amount = -10000;
+                newEvent.vendor = DEMO_VENDOR;
+                newEvent.meta = {status: 'RELEASED'};
+            }
+            else if (action === 'INVOICE') {
+                newEvent.type = 'INVOICE_SUBMIT';
+                newEvent.amount = -15000; // Cost to buyer
+                newEvent.vendor = DEMO_VENDOR;
+                newEvent.meta = {status: 'VALIDATED_BY_BRIDGE'};
+                alert("SIGHTLINE BRIDGE: Invoice Hashed & Validated.");
+            }
+
+            events.push(newEvent);
+            sliderValue = events.length;
+            slider.value = sliderValue;
+            render();
+        }
+
+        function downloadCSV() {
+            const header = ['Timestamp', 'Hash', 'Type', 'Amount', 'Metadata'];
+            const rows = events.map(e => [e.ts, e.hash, e.type, e.amount, JSON.stringify(e.meta).replace(/"/g, '""')]);
+            const csvContent = [header.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sightline_ledger_export.csv';
+            a.click();
+        }
+
+        // Init
+        slider.addEventListener('input', (e) => { sliderValue = parseInt(e.target.value); render(); });
+        slider.value = sliderValue;
+        render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sightline</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0b0d;
+            --bg-secondary: #12141a;
+            --bg-tertiary: #1a1d24;
+            --border-color: #2a2e38;
+            --text-primary: #ffffff;
+            --text-secondary: #9aa0ab;
+            --text-muted: #6b7280;
+            --accent-blue: #4da6ff;
+            --accent-green: #00d4aa;
+            --accent-red: #ff6b6b;
+            --accent-yellow: #ffc107;
+            --accent-orange: #ff9f43;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg-primary); 
+            color: var(--text-primary); 
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-blue), #a78bfa);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .header-metrics {
+            display: flex;
+            gap: 32px;
+        }
+        .header-metric {
+            text-align: right;
+        }
+        .header-metric-value {
+            font-size: 20px;
+            font-weight: 600;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .header-metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Story Banner */
+        .story-banner {
+            background: linear-gradient(135deg, rgba(77, 166, 255, 0.1), rgba(0, 212, 170, 0.1));
+            border: 1px solid rgba(77, 166, 255, 0.2);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+        .story-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+        .story-highlight {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+        .story-warning {
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+        .story-good {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* Forecast Chart */
+        .forecast-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .forecast-chart {
+            height: 200px;
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+        .chart-grid-line {
+            stroke: var(--border-color);
+            stroke-width: 1;
+        }
+        .chart-line {
+            fill: none;
+            stroke: var(--accent-blue);
+            stroke-width: 2.5;
+        }
+        .chart-area {
+            fill: url(#areaGradient);
+        }
+        .chart-reserve {
+            stroke: var(--accent-red);
+            stroke-width: 1.5;
+            stroke-dasharray: 6, 4;
+        }
+        .chart-point {
+            fill: var(--accent-blue);
+        }
+        .chart-point.low {
+            fill: var(--accent-orange);
+        }
+        .chart-label {
+            font-size: 10px;
+            fill: var(--text-muted);
+        }
+        .chart-value-label {
+            font-size: 11px;
+            fill: var(--text-secondary);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .reserve-label {
+            font-size: 10px;
+            fill: var(--accent-red);
+        }
+        .low-point-marker {
+            font-size: 10px;
+            fill: var(--accent-orange);
+            font-weight: 600;
+        }
+        .forecast-legend {
+            display: flex;
+            gap: 20px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        .legend-dot.cash { background: var(--accent-blue); }
+        .legend-dot.reserve { background: var(--accent-red); height: 2px; border-style: dashed; }
+
+        /* Decisions Panel */
+        .decisions-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .decisions-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .decisions-count {
+            background: var(--accent-orange);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        .decision-item {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--accent-orange);
+        }
+        .decision-item:last-child {
+            margin-bottom: 0;
+        }
+        .decision-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .decision-detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .decision-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .decision-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+        .btn-primary {
+            background: var(--accent-green);
+            color: white;
+        }
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Mechanism Section */
+        .mechanism-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .mechanism-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .mechanism-flow {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 20px;
+        }
+        .mechanism-step {
+            text-align: center;
+            padding: 20px;
+        }
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 auto 12px;
+        }
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .step-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .step-data {
+            font-size: 13px;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--accent-blue);
+        }
+        .mechanism-arrow {
+            color: var(--accent-green);
+            font-size: 24px;
+        }
+        .mechanism-result {
+            text-align: center;
+            padding: 16px;
+            background: rgba(0, 212, 170, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+        .result-text {
+            font-size: 14px;
+            color: var(--accent-green);
+            font-weight: 500;
+        }
+
+        /* Proof Section */
+        .proof-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .proof-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        .proof-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        .proof-item {
+            display: flex;
+            gap: 16px;
+        }
+        .proof-values {
+            flex: 1;
+        }
+        .proof-main {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .proof-number {
+            font-size: 28px;
+            font-weight: 600;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .proof-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .proof-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .proof-comparison {
+            font-size: 11px;
+            color: var(--accent-green);
+            margin-top: 4px;
+        }
+        .proof-divider {
+            width: 1px;
+            background: var(--border-color);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">◈</div>
+                Sightline
+            </div>
+            <div class="header-metrics">
+                <div class="header-metric">
+                    <div class="header-metric-value">$2,847,392</div>
+                    <div class="header-metric-label">Cash Position</div>
+                </div>
+                <div class="header-metric">
+                    <div class="header-metric-value" style="color: var(--accent-green);">94%</div>
+                    <div class="header-metric-label">Forecast Confidence</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Story Banner -->
+        <div class="story-banner">
+            <div class="story-text">
+                You'll pay <span class="story-highlight">$487,250 this week</span>. 
+                <span class="story-highlight">$152,047</span> is due Friday to Pacific Steel. 
+                Your <span class="story-warning">low point is Week 3 at $2.31M</span>—still 
+                <span class="story-good">$1.81M above your reserve</span>. 
+                <span class="story-warning">3 items</span> need your decision.
+            </div>
+        </div>
+
+        <!-- Main Grid: Forecast + Decisions -->
+        <div class="main-grid">
+            <!-- Forecast -->
+            <div class="forecast-card">
+                <div class="card-title">13-Week Cash Forecast</div>
+                <div class="forecast-chart">
+                    <svg class="chart-svg" viewBox="0 0 500 180">
+                        <defs>
+                            <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color: #4da6ff; stop-opacity: 0.15"/>
+                                <stop offset="100%" style="stop-color: #4da6ff; stop-opacity: 0"/>
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- Grid lines -->
+                        <line x1="40" y1="30" x2="490" y2="30" class="chart-grid-line"/>
+                        <line x1="40" y1="70" x2="490" y2="70" class="chart-grid-line"/>
+                        <line x1="40" y1="110" x2="490" y2="110" class="chart-grid-line"/>
+                        <line x1="40" y1="150" x2="490" y2="150" class="chart-grid-line"/>
+                        
+                        <!-- Y-axis labels -->
+                        <text x="35" y="34" class="chart-value-label" text-anchor="end">$4M</text>
+                        <text x="35" y="74" class="chart-value-label" text-anchor="end">$3M</text>
+                        <text x="35" y="114" class="chart-value-label" text-anchor="end">$2M</text>
+                        <text x="35" y="154" class="chart-value-label" text-anchor="end">$1M</text>
+                        
+                        <!-- Reserve line at $500K (y = 150 - (500/4000)*120 = 135) -->
+                        <line x1="40" y1="135" x2="490" y2="135" class="chart-reserve"/>
+                        <text x="492" y="138" class="reserve-label" text-anchor="start">Reserve $500K</text>
+                        
+                        <!-- Cash flow area -->
+                        <path class="chart-area" d="M 40,66 L 75,62 L 110,68 L 145,78 L 180,72 L 215,65 L 250,70 L 285,58 L 320,52 L 355,48 L 390,42 L 425,38 L 460,35 L 490,32 L 490,150 L 40,150 Z"/>
+                        
+                        <!-- Cash flow line: values roughly $2.85M to $3.8M range, with dip at week 3 -->
+                        <path class="chart-line" d="M 40,66 L 75,62 L 110,68 L 145,78 L 180,72 L 215,65 L 250,70 L 285,58 L 320,52 L 355,48 L 390,42 L 425,38 L 460,35 L 490,32"/>
+                        
+                        <!-- Data points -->
+                        <circle cx="40" cy="66" r="4" class="chart-point"/>  <!-- Now -->
+                        <circle cx="75" cy="62" r="4" class="chart-point"/>  <!-- W1 -->
+                        <circle cx="110" cy="68" r="4" class="chart-point"/> <!-- W2 -->
+                        <circle cx="145" cy="78" r="5" class="chart-point low"/> <!-- W3 - Low point -->
+                        <circle cx="180" cy="72" r="4" class="chart-point"/> <!-- W4 -->
+                        <circle cx="215" cy="65" r="4" class="chart-point"/> <!-- W5 -->
+                        <circle cx="250" cy="70" r="4" class="chart-point"/> <!-- W6 -->
+                        <circle cx="285" cy="58" r="4" class="chart-point"/> <!-- W7 -->
+                        <circle cx="320" cy="52" r="4" class="chart-point"/> <!-- W8 -->
+                        <circle cx="355" cy="48" r="4" class="chart-point"/> <!-- W9 -->
+                        <circle cx="390" cy="42" r="4" class="chart-point"/> <!-- W10 -->
+                        <circle cx="425" cy="38" r="4" class="chart-point"/> <!-- W11 -->
+                        <circle cx="460" cy="35" r="4" class="chart-point"/> <!-- W12 -->
+                        <circle cx="490" cy="32" r="4" class="chart-point"/> <!-- W13 -->
+                        
+                        <!-- Low point marker -->
+                        <text x="145" y="95" class="low-point-marker" text-anchor="middle">↓ $2.31M</text>
+                        
+                        <!-- X-axis labels -->
+                        <text x="40" y="168" class="chart-label" text-anchor="middle">Now</text>
+                        <text x="110" y="168" class="chart-label" text-anchor="middle">W2</text>
+                        <text x="145" y="168" class="chart-label" text-anchor="middle">W3</text>
+                        <text x="215" y="168" class="chart-label" text-anchor="middle">W5</text>
+                        <text x="285" y="168" class="chart-label" text-anchor="middle">W7</text>
+                        <text x="355" y="168" class="chart-label" text-anchor="middle">W9</text>
+                        <text x="425" y="168" class="chart-label" text-anchor="middle">W11</text>
+                        <text x="490" y="168" class="chart-label" text-anchor="middle">W13</text>
+                    </svg>
+                </div>
+                <div class="forecast-legend">
+                    <div class="legend-item"><div class="legend-dot cash"></div> Projected Cash</div>
+                    <div class="legend-item"><div class="legend-dot reserve"></div> Minimum Reserve</div>
+                </div>
+            </div>
+
+            <!-- Decisions -->
+            <div class="decisions-card">
+                <div class="decisions-header">
+                    <div class="card-title" style="margin-bottom: 0;">Awaiting Your Decision</div>
+                    <div class="decisions-count">3</div>
+                </div>
+                
+                <div class="decision-item">
+                    <div class="decision-title">Invoice Variance</div>
+                    <div class="decision-detail">Shenzhen Logistics invoice is $4,400 (2.6%) over PO. Vendor note: "Expedite fee—air freight due to port delay"</div>
+                    <div class="decision-meta">$172,400 vs PO $168,000</div>
+                    <div class="decision-actions">
+                        <button class="btn btn-primary">Approve</button>
+                        <button class="btn btn-secondary">Dispute</button>
+                    </div>
+                </div>
+
+                <div class="decision-item">
+                    <div class="decision-title">Spending Anomaly</div>
+                    <div class="decision-detail">AWS December invoice is 26% above 90-day pattern.</div>
+                    <div class="decision-meta">$17,200 vs expected $13,650</div>
+                    <div class="decision-actions">
+                        <button class="btn btn-primary">Expected</button>
+                        <button class="btn btn-secondary">Investigate</button>
+                    </div>
+                </div>
+
+                <div class="decision-item" style="border-left-color: var(--accent-green);">
+                    <div class="decision-title">Early Pay Discount</div>
+                    <div class="decision-detail">Henderson Mfg offers 2% if paid by Jan 20. Effective APR: 36.7%.</div>
+                    <div class="decision-meta">Save $3,103 on $155,150</div>
+                    <div class="decision-actions">
+                        <button class="btn btn-primary">Take Discount</button>
+                        <button class="btn btn-secondary">Pay at Terms</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mechanism -->
+        <div class="mechanism-section">
+            <div class="mechanism-title">How It Works</div>
+            <div class="mechanism-flow">
+                <div class="mechanism-step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Expectation Created</div>
+                    <div class="step-desc">PO approved, bill entered</div>
+                    <div class="step-data">$152,047</div>
+                </div>
+                <div class="mechanism-arrow">→</div>
+                <div class="mechanism-step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Payment Authorized</div>
+                    <div class="step-desc">Scheduled for Friday run</div>
+                    <div class="step-data">ACH to Pacific Steel</div>
+                </div>
+                <div class="mechanism-arrow">→</div>
+                <div class="mechanism-step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Bank Confirms</div>
+                    <div class="step-desc">Matches expectation exactly</div>
+                    <div class="step-data">$152,047 ✓</div>
+                </div>
+            </div>
+            <div class="mechanism-result">
+                <div class="result-text">The bank confirmed what we already knew would happen. No reconciliation required.</div>
+            </div>
+        </div>
+
+        <!-- Proof -->
+        <div class="proof-section">
+            <div class="proof-title">This Month</div>
+            <div class="proof-grid">
+                <div class="proof-item">
+                    <div class="proof-values">
+                        <div class="proof-main">
+                            <span class="proof-number">186</span>
+                            <span class="proof-unit">transactions</span>
+                        </div>
+                        <div class="proof-label">Native events processed</div>
+                        <div class="proof-comparison">→ 0 reconciliation required</div>
+                    </div>
+                </div>
+                <div class="proof-divider"></div>
+                <div class="proof-item">
+                    <div class="proof-values">
+                        <div class="proof-main">
+                            <span class="proof-number">847</span>
+                            <span class="proof-unit">entries</span>
+                        </div>
+                        <div class="proof-label">Journal entries auto-generated</div>
+                        <div class="proof-comparison">→ 0 manual entries</div>
+                    </div>
+                </div>
+                <div class="proof-divider"></div>
+                <div class="proof-item">
+                    <div class="proof-values">
+                        <div class="proof-main">
+                            <span class="proof-number">$8,420</span>
+                        </div>
+                        <div class="proof-label">Discounts captured</div>
+                        <div class="proof-comparison">→ 12 early-pay opportunities taken</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-status">
+                <span class="status-dot"></span>
+                <span>GL balanced • Trial balance $0.00 • Books current as of 2 minutes ago</span>
+            </div>
+            <div>
+                Jan 15, 2025
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sightline – Tensor Cell View</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-panel: #0d1021;
+      --bg-card: #15192c;
+      --border-subtle: #262b42;
+      --accent: #7b5cff;
+      --accent-soft: rgba(123, 92, 255, 0.16);
+      --accent-strong: rgba(123, 92, 255, 0.35);
+      --text-main: #f7f7ff;
+      --text-muted: #a6accd;
+      --bad: #ff5c7a;
+      --good: #47d99e;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.65);
+      --radius-xl: 18px;
+      --radius-lg: 12px;
+      --radius-pill: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Inter", sans-serif;
+      background: radial-gradient(circle at top, #101531, #050816 60%);
+      color: var(--text-main);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 32px 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1180px;
+      background: linear-gradient(135deg, #050816 0%, #070a16 50%, #050816);
+      border-radius: 24px;
+      border: 1px solid rgba(126, 132, 200, 0.18);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(123, 92, 255, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(123, 92, 255, 0.4);
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 620px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border-radius: var(--radius-pill);
+      padding: 6px 10px;
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(11, 15, 31, 0.9);
+    }
+
+    .pill strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--good);
+      box-shadow: 0 0 0 3px rgba(71, 217, 158, 0.28);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, 1.5fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top left, #181d3a, #0b0e20 56%);
+      border: 1px solid rgba(120, 130, 210, 0.24);
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at 0 0,
+        rgba(123, 92, 255, 0.08),
+        transparent 60%
+      );
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      z-index: 1;
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .panel-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(3, 5, 13, 0.7);
+      color: var(--text-muted);
+    }
+
+    .panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 1;
+    }
+
+    .event-card {
+      padding: 8px 9px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      background: linear-gradient(135deg, #121629, #0b0f1f);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+
+    .event-card.highlight {
+      border-color: var(--accent-strong);
+      box-shadow: 0 0 0 1px rgba(123, 92, 255, 0.4),
+        0 12px 35px rgba(4, 5, 12, 0.9);
+    }
+
+    .event-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .event-name {
+      font-weight: 500;
+    }
+
+    .event-tag {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+    }
+
+    .event-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .event-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .event-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .event-dot.physical {
+      background: #47d99e;
+      box-shadow: 0 0 0 3px rgba(71, 217, 158, 0.3);
+    }
+
+    .event-dot.financial {
+      background: #7b5cff;
+      box-shadow: 0 0 0 3px rgba(123, 92, 255, 0.3);
+    }
+
+    .event-amount {
+      font-size: 12px;
+      color: var(--text-main);
+    }
+
+    .event-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--bad);
+      background: rgba(255, 92, 122, 0.08);
+    }
+
+    /* Tensor cell */
+
+    .tensor-panel {
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top, #1b1f40, #050816);
+      border: 1px solid rgba(123, 92, 255, 0.6);
+      box-shadow: 0 0 0 1px rgba(123, 92, 255, 0.25),
+        0 16px 45px rgba(0, 0, 0, 0.8);
+      position: relative;
+      padding: 16px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tensor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tensor-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tensor-id {
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      background: rgba(3, 6, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .tensor-pill {
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      background: rgba(19, 25, 58, 0.9);
+      border: 1px solid rgba(123, 92, 255, 0.6);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .tensor-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .tensor-slot {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(6, 9, 24, 0.92);
+      padding: 7px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      position: relative;
+    }
+
+    .tensor-slot-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .tensor-slot-main {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tensor-slot-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .tensor-slot.bad {
+      border-color: rgba(255, 92, 122, 0.6);
+      box-shadow: 0 0 0 1px rgba(255, 92, 122, 0.3);
+    }
+
+    .link-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .link-line {
+      flex: 1;
+      border-bottom: 1px dashed rgba(153, 161, 218, 0.35);
+    }
+
+    .quote {
+      font-size: 11px;
+      color: var(--text-muted);
+      border-radius: 10px;
+      border: 1px dashed rgba(123, 92, 255, 0.4);
+      padding: 7px 8px;
+      background: rgba(7, 9, 22, 0.9);
+    }
+
+    .quote em {
+      color: var(--accent);
+      font-style: normal;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          TENSOR INSPECTOR
+        </div>
+        <h1>Tensor cells must reflect the physical precursor to every financial claim</h1>
+        <p class="subtitle">
+          Each payable in this view is backed by at least one physical event. The tensor cell
+          ties them together as <strong>Observation</strong>, <strong>Operation</strong>,
+          and <strong>Obligation Proof</strong>.
+        </p>
+      </div>
+      <div class="toolbar">
+        <div class="pill">
+          <span class="pill-dot"></span>
+          <span><strong>Policy:</strong> &nbsp;No payment without receipt&nbsp;≥&nbsp;invoice</span>
+        </div>
+        <div class="pill">
+          <span>Org:</span><strong> ARR Lighting – PO&nbsp;1001</strong>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Physical Events -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Physical precursors</div>
+          <div class="panel-badge">WMS / 3PL / Factory</div>
+        </div>
+        <div class="panel-body">
+          <div class="event-card">
+            <div class="event-title-row">
+              <div class="event-name">Supplier Ship Notice</div>
+              <div class="event-tag">Event • ASN</div>
+            </div>
+            <div class="event-meta">
+              <span><span class="event-dot physical"></span>Qty: 100 units</span>
+              <span>From: Ningbo Factory</span>
+              <span>To: 3PL – Indiana</span>
+            </div>
+          </div>
+
+          <div class="event-card highlight">
+            <div class="event-title-row">
+              <div class="event-name">Receipt GRN-8721 (Partial)</div>
+              <div class="event-tag">Event • WMS Receipt</div>
+            </div>
+            <div class="event-meta">
+              <span><span class="event-dot physical"></span>Received: 60 / 100</span>
+              <span>Location: IN-01-A-03</span>
+              <span>Time: 2025-03-18 14:05</span>
+            </div>
+            <div class="event-amount">Value at cost: $3,000</div>
+          </div>
+
+          <div class="event-card">
+            <div class="event-title-row">
+              <div class="event-name">Receipt GRN-8790 (Second)</div>
+              <div class="event-tag">Event • WMS Receipt</div>
+            </div>
+            <div class="event-meta">
+              <span><span class="event-dot physical"></span>Received: 40 / 100</span>
+              <span>Location: IN-01-A-03</span>
+              <span>Time: 2025-03-22 09:41</span>
+            </div>
+            <div class="event-amount">Value at cost: $2,000</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Financial Claims -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Financial claims</div>
+          <div class="panel-badge">AP / Invoice / Payment</div>
+        </div>
+        <div class="panel-body">
+          <div class="event-card">
+            <div class="event-title-row">
+              <div class="event-name">Invoice INV-7788</div>
+              <div class="event-tag">Event • Supplier Invoice</div>
+            </div>
+            <div class="event-meta">
+              <span><span class="event-dot financial"></span>Qty: 80 units</span>
+              <span>Unit cost: $50</span>
+              <span>Amount: $4,000</span>
+            </div>
+          </div>
+
+          <div class="event-card highlight">
+            <div class="event-title-row">
+              <div class="event-name">AP Claim &amp; Payment Attempt</div>
+              <div class="event-tag">Event • Payable</div>
+            </div>
+            <div class="event-meta">
+              <span><span class="event-dot financial"></span>Currency: USD</span>
+              <span>Proposed payment: $4,000</span>
+              <span>Due: 2025-04-05</span>
+            </div>
+            <div class="event-amount">Claimed: 80 units</div>
+            <div class="event-status">Blocked – invoice &gt; received (80 &gt; 60)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tensor Cell -->
+      <section class="tensor-panel">
+        <div class="tensor-header">
+          <div class="tensor-title">
+            Tensor Cell
+            <span class="tensor-id">ARR-PO-1001 • INV-7788</span>
+          </div>
+          <div class="tensor-pill">Explaining this claim</div>
+        </div>
+
+        <div class="tensor-grid">
+          <div class="tensor-slot">
+            <div class="tensor-slot-label">Observation (state_in)</div>
+            <div class="tensor-slot-main">
+              60 units physically received; invoice claims 80 units.
+            </div>
+            <div class="tensor-slot-meta">
+              Source: GRN-8721 (WMS), inventory location IN-01-A-03.
+            </div>
+          </div>
+
+          <div class="tensor-slot">
+            <div class="tensor-slot-label">Operation (delta)</div>
+            <div class="tensor-slot-main">
+              Attempt to create payment of $4,000 for 80 units on INV-7788.
+            </div>
+            <div class="tensor-slot-meta">
+              Effect: would settle supplier claim and reduce AP + cash.
+            </div>
+          </div>
+
+          <div class="tensor-slot bad">
+            <div class="tensor-slot-label">Obligation proof (invariants)</div>
+            <div class="tensor-slot-main">
+              <strong>FAIL</strong> – policy “invoice_qty ≤ received_qty” violated.
+            </div>
+            <div class="tensor-slot-meta">
+              Evaluated: 80 ≤ 60 → false. Tensor blocks the financial claim until a
+              matching physical receipt exists.
+            </div>
+          </div>
+        </div>
+
+        <div class="link-hint">
+          <span class="link-line"></span>
+          <span>Tensor cell is only valid because it binds <strong>physical</strong>
+            receipts to this <strong>financial</strong> claim.</span>
+        </div>
+
+        <div class="quote">
+          <em>Design note:</em> every financial tensor must be anchored to at least one
+          physical event, or it is treated as structurally unsafe and cannot release
+          cash.
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
