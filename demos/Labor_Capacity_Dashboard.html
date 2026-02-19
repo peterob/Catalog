@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labor & Capacity Planning - Sightline Finance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-header { background: linear-gradient(135deg, #059669 0%, #0d9488 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15); }
+        .tab-active { border-bottom: 3px solid #059669; color: #059669; }
+        .complexity-standard { background: #dcfce7; color: #166534; }
+        .complexity-moderate { background: #dbeafe; color: #1e40af; }
+        .complexity-complex { background: #fef3c7; color: #92400e; }
+        .complexity-specialist { background: #f3e8ff; color: #6b21a8; }
+        .chart-container { position: relative; height: 300px; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="gradient-header text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold">Labor & Capacity Planning</h1>
+                    <p class="text-emerald-100 mt-1">Financial Management Workforce Analytics • Sightline/CAST</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="bg-white/20 rounded-lg px-4 py-2">
+                        <p class="text-xs text-emerald-100">Active Staff</p>
+                        <p class="text-xl font-bold">14</p>
+                    </div>
+                    <div class="bg-white/20 rounded-lg px-4 py-2">
+                        <p class="text-xs text-emerald-100">Clusters</p>
+                        <p class="text-xl font-bold">27</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex gap-1 mt-6 -mb-6">
+                <button onclick="showTab('overview')" id="tab-overview" class="tab-btn px-5 py-3 rounded-t-lg font-medium bg-white/10 hover:bg-white/20 tab-active">Overview</button>
+                <button onclick="showTab('clusters')" id="tab-clusters" class="tab-btn px-5 py-3 rounded-t-lg font-medium bg-white/10 hover:bg-white/20">Clusters</button>
+                <button onclick="showTab('team')" id="tab-team" class="tab-btn px-5 py-3 rounded-t-lg font-medium bg-white/10 hover:bg-white/20">Team</button>
+                <button onclick="showTab('planner')" id="tab-planner" class="tab-btn px-5 py-3 rounded-t-lg font-medium bg-white/10 hover:bg-white/20">Planner</button>
+            </nav>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <div id="content-overview" class="tab-content">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+                <div class="stat-card glass-card rounded-xl p-5 border border-gray-100 shadow-sm transition-all">
+                    <p class="text-sm font-medium text-gray-500">Today's Capacity</p>
+                    <p class="text-3xl font-bold text-emerald-600 mt-1">84 hrs</p>
+                </div>
+                <div class="stat-card glass-card rounded-xl p-5 border border-gray-100 shadow-sm transition-all">
+                    <p class="text-sm font-medium text-gray-500">Queue Size</p>
+                    <p class="text-3xl font-bold text-amber-600 mt-1">127</p>
+                </div>
+                <div class="stat-card glass-card rounded-xl p-5 border border-gray-100 shadow-sm transition-all">
+                    <p class="text-sm font-medium text-gray-500">Utilization</p>
+                    <p class="text-3xl font-bold text-blue-600 mt-1">78%</p>
+                </div>
+                <div class="stat-card glass-card rounded-xl p-5 border border-gray-100 shadow-sm transition-all">
+                    <p class="text-sm font-medium text-gray-500">Cycle Time</p>
+                    <p class="text-3xl font-bold text-indigo-600 mt-1">1.4 days</p>
+                </div>
+                <div class="stat-card glass-card rounded-xl p-5 border border-gray-100 shadow-sm transition-all">
+                    <p class="text-sm font-medium text-gray-500">SLA Compliance</p>
+                    <p class="text-3xl font-bold text-emerald-600 mt-1">94.2%</p>
+                </div>
+                <div class="stat-card glass-card rounded-xl p-5 border border-gray-100 shadow-sm transition-all">
+                    <p class="text-sm font-medium text-gray-500">Error Rate</p>
+                    <p class="text-3xl font-bold text-emerald-600 mt-1">1.8%</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="glass-card rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <h3 class="font-semibold text-gray-900 mb-4">Workload by Domain</h3>
+                    <div class="chart-container"><canvas id="domainChart"></canvas></div>
+                </div>
+                <div class="glass-card rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <h3 class="font-semibold text-gray-900 mb-4">Team Utilization</h3>
+                    <div class="chart-container"><canvas id="utilChart"></canvas></div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card rounded-xl p-6 border-l-4 border-red-400 shadow-sm bg-red-50">
+                    <h3 class="font-semibold text-red-800 mb-2">⚠️ Capacity Alerts</h3>
+                    <ul class="text-sm text-red-700 space-y-1">
+                        <li>• Month-end close: GL team at 112%</li>
+                        <li>• 2 AP staff on PTO next week</li>
+                    </ul>
+                </div>
+                <div class="glass-card rounded-xl p-6 border-l-4 border-amber-400 shadow-sm bg-amber-50">
+                    <h3 class="font-semibold text-amber-800 mb-2">💡 Insights</h3>
+                    <ul class="text-sm text-amber-700 space-y-1">
+                        <li>• Invoice exceptions +40% vs baseline</li>
+                        <li>• AR collections +15% recovery</li>
+                    </ul>
+                </div>
+                <div class="glass-card rounded-xl p-6 border-l-4 border-emerald-400 shadow-sm bg-emerald-50">
+                    <h3 class="font-semibold text-emerald-800 mb-2">🤖 Automation</h3>
+                    <ul class="text-sm text-emerald-700 space-y-1">
+                        <li>• 850 invoices/month RPA-eligible</li>
+                        <li>• 780 payments auto-applicable</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="content-clusters" class="tab-content hidden">
+            <div class="flex items-center gap-4 mb-6">
+                <select id="domainFilter" onchange="filterClusters()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="all">All Domains</option>
+                    <option value="ap">Accounts Payable</option>
+                    <option value="ar">Accounts Receivable</option>
+                    <option value="gl">General Ledger</option>
+                    <option value="rpt">Reporting</option>
+                </select>
+                <span id="clusterCount" class="text-sm text-gray-500">27 clusters</span>
+            </div>
+            <div id="clusterGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+        <div id="content-team" class="tab-content hidden">
+            <div class="glass-card rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="text-left py-3 px-4 font-medium">Name</th>
+                            <th class="text-left py-3 px-4 font-medium">Role</th>
+                            <th class="text-left py-3 px-4 font-medium">Domain</th>
+                            <th class="text-center py-3 px-4 font-medium">Capacity</th>
+                            <th class="text-center py-3 px-4 font-medium">Load</th>
+                            <th class="text-center py-3 px-4 font-medium">Utilization</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamTable" class="divide-y divide-gray-100"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="content-planner" class="tab-content hidden">
+            <div class="glass-card rounded-xl p-6 border border-gray-100 shadow-sm">
+                <h3 class="font-semibold text-gray-900 mb-4">Workload Calculator</h3>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Tasks</label>
+                    <div id="taskBtns" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div id="volInputs" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg p-6">
+                    <h4 class="font-semibold mb-4">Staffing Requirements</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div><p class="text-sm text-gray-500">Volume</p><p id="planVol" class="text-2xl font-bold text-emerald-600">0</p></div>
+                        <div><p class="text-sm text-gray-500">Hours</p><p id="planHrs" class="text-2xl font-bold text-emerald-600">0</p></div>
+                        <div><p class="text-sm text-gray-500">FTE Required</p><p id="planFTE" class="text-2xl font-bold text-emerald-600">0.0</p></div>
+                        <div><p class="text-sm text-gray-500">Monthly Cost</p><p id="planCost" class="text-2xl font-bold text-emerald-600">$0</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+    const clusters = [
+        {code:'AP-INV-STD',name:'Standard Invoice',domain:'ap',complexity:'standard',effort:12,std:4,vol:45,skill:2,auto:true},
+        {code:'AP-INV-NPO',name:'Non-PO Invoice',domain:'ap',complexity:'moderate',effort:18,std:6,vol:20,skill:2,auto:false},
+        {code:'AP-INV-EXC',name:'Invoice Exception',domain:'ap',complexity:'complex',effort:35,std:12,vol:12,skill:3,auto:false},
+        {code:'AP-VND-SET',name:'Vendor Setup',domain:'ap',complexity:'moderate',effort:45,std:15,vol:5,skill:3,auto:false},
+        {code:'AP-PMT-RUN',name:'Payment Run',domain:'ap',complexity:'standard',effort:25,std:8,vol:3,skill:3,auto:true},
+        {code:'AR-INV-GEN',name:'Customer Invoice',domain:'ar',complexity:'standard',effort:10,std:3,vol:30,skill:2,auto:true},
+        {code:'AR-PMT-APP',name:'Payment Application',domain:'ar',complexity:'standard',effort:8,std:3,vol:40,skill:2,auto:true},
+        {code:'AR-PMT-EXC',name:'Payment Exception',domain:'ar',complexity:'complex',effort:25,std:10,vol:8,skill:3,auto:false},
+        {code:'AR-COL-STD',name:'Standard Collections',domain:'ar',complexity:'moderate',effort:15,std:5,vol:25,skill:2,auto:false},
+        {code:'GL-JE-STD',name:'Standard Journal Entry',domain:'gl',complexity:'standard',effort:10,std:4,vol:15,skill:2,auto:true},
+        {code:'GL-JE-CMP',name:'Complex Journal Entry',domain:'gl',complexity:'complex',effort:30,std:12,vol:5,skill:4,auto:false},
+        {code:'GL-REC-BNK',name:'Bank Reconciliation',domain:'gl',complexity:'moderate',effort:45,std:15,vol:0,skill:3,auto:false},
+        {code:'GL-REC-BS',name:'Balance Sheet Recon',domain:'gl',complexity:'complex',effort:35,std:12,vol:0,skill:3,auto:false},
+        {code:'RPT-FIN-STD',name:'Financial Reporting',domain:'rpt',complexity:'moderate',effort:60,std:20,vol:0,skill:3,auto:false},
+        {code:'RPT-ADH-SMP',name:'Simple Ad-Hoc',domain:'rpt',complexity:'standard',effort:20,std:8,vol:5,skill:2,auto:false},
+    ];
+    const team = [
+        {name:'Sarah Chen',role:'AP Manager',domain:'Accounts Payable',cap:5.6,load:4.8},
+        {name:'Michael Torres',role:'AP Specialist',domain:'Accounts Payable',cap:6.4,load:5.2},
+        {name:'Jennifer Walsh',role:'AP Specialist',domain:'Accounts Payable',cap:6.4,load:6.8},
+        {name:'David Kim',role:'AP Clerk',domain:'Accounts Payable',cap:6.8,load:5.5},
+        {name:'Amanda Rodriguez',role:'AR Manager',domain:'Accounts Receivable',cap:5.6,load:4.2},
+        {name:'James Wilson',role:'AR Specialist',domain:'Accounts Receivable',cap:6.4,load:5.8},
+        {name:'Lisa Park',role:'Collections',domain:'Accounts Receivable',cap:6.4,load:7.2},
+        {name:'Robert Martinez',role:'Controller',domain:'General Ledger',cap:4.8,load:5.5},
+        {name:'Emily Thompson',role:'Sr Accountant',domain:'General Ledger',cap:6.0,load:5.0},
+        {name:'Chris Anderson',role:'Staff Accountant',domain:'General Ledger',cap:6.4,load:4.8},
+        {name:'Kevin Brown',role:'Financial Analyst',domain:'Reporting',cap:6.0,load:6.5},
+    ];
+    let selTasks = [];
+    function showTab(id){
+        document.querySelectorAll('.tab-content').forEach(e=>e.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('tab-active'));
+        document.getElementById('content-'+id).classList.remove('hidden');
+        document.getElementById('tab-'+id).classList.add('tab-active');
+    }
+    function renderClusters(filter='all'){
+        const f = filter==='all'?clusters:clusters.filter(c=>c.domain===filter);
+        document.getElementById('clusterGrid').innerHTML = f.map(c=>`
+            <div class="glass-card rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all">
+                <div class="flex justify-between items-start mb-2">
+                    <div><h3 class="font-semibold text-gray-900">${c.name}</h3><p class="text-xs text-gray-500">${c.code}</p></div>
+                    <span class="complexity-${c.complexity} px-2 py-1 rounded-full text-xs">${c.complexity}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-3 text-sm">
+                    <div><span class="text-gray-500">Effort:</span> <strong>${c.effort} min</strong></div>
+                    <div><span class="text-gray-500">Volume:</span> <strong>${c.vol||'Periodic'}/day</strong></div>
+                    <div><span class="text-gray-500">Skill:</span> <strong>${'★'.repeat(c.skill)}</strong></div>
+                    <div>${c.auto?'<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs">Auto</span>':''}</div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById('clusterCount').textContent = f.length+' clusters';
+    }
+    function filterClusters(){renderClusters(document.getElementById('domainFilter').value);}
+    function renderTeam(){
+        document.getElementById('teamTable').innerHTML = team.map(m=>{
+            const u=Math.round(m.load/m.cap*100);
+            const c=u<70?'#22c55e':u<85?'#3b82f6':u<100?'#f59e0b':'#ef4444';
+            return `<tr class="hover:bg-gray-50">
+                <td class="py-3 px-4 font-medium">${m.name}</td>
+                <td class="py-3 px-4">${m.role}</td>
+                <td class="py-3 px-4">${m.domain}</td>
+                <td class="py-3 px-4 text-center">${m.cap} hrs</td>
+                <td class="py-3 px-4 text-center">${m.load} hrs</td>
+                <td class="py-3 px-4"><div class="flex items-center gap-2"><div class="flex-1 bg-gray-200 rounded-full h-2"><div class="h-2 rounded-full" style="width:${Math.min(u,100)}%;background:${c}"></div></div><span class="text-sm font-medium" style="color:${c}">${u}%</span></div></td>
+            </tr>`;
+        }).join('');
+    }
+    function renderTaskBtns(){
+        document.getElementById('taskBtns').innerHTML = clusters.filter(c=>c.vol>0).map(c=>`
+            <button onclick="toggleTask('${c.code}')" id="btn-${c.code}" class="px-3 py-1.5 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-gray-200">${c.name}</button>
+        `).join('');
+    }
+    function toggleTask(code){
+        const btn=document.getElementById('btn-'+code);
+        if(selTasks.includes(code)){selTasks=selTasks.filter(c=>c!==code);btn.classList.remove('bg-emerald-600','text-white');btn.classList.add('bg-gray-100','text-gray-700');}
+        else{selTasks.push(code);btn.classList.add('bg-emerald-600','text-white');btn.classList.remove('bg-gray-100','text-gray-700');}
+        updateVolInputs();calcPlan();
+    }
+    function updateVolInputs(){
+        document.getElementById('volInputs').innerHTML = selTasks.map(code=>{
+            const t=clusters.find(c=>c.code===code);
+            return `<div><label class="block text-sm font-medium text-gray-700 mb-1">${t.name}</label><input type="number" id="vol-${code}" value="${t.vol*22}" onchange="calcPlan()" class="w-full px-3 py-2 border border-gray-300 rounded-lg"></div>`;
+        }).join('');
+    }
+    function calcPlan(){
+        let v=0,m=0;
+        selTasks.forEach(code=>{const t=clusters.find(c=>c.code===code);const vol=parseInt(document.getElementById('vol-'+code)?.value||t.vol*22);v+=vol;m+=vol*t.effort;});
+        const h=m/60,fte=h/(160*0.75),cost=h*59.25;
+        document.getElementById('planVol').textContent=v.toLocaleString();
+        document.getElementById('planHrs').textContent=Math.round(h).toLocaleString();
+        document.getElementById('planFTE').textContent=fte.toFixed(1);
+        document.getElementById('planCost').textContent='$'+Math.round(cost).toLocaleString();
+    }
+    function initCharts(){
+        new Chart(document.getElementById('domainChart'),{type:'bar',data:{labels:['AP','AR','GL','Reporting'],datasets:[{label:'Queue',data:[52,38,18,12],backgroundColor:['#3b82f6','#10b981','#f59e0b','#6366f1']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+        new Chart(document.getElementById('utilChart'),{type:'bar',data:{labels:['AP Team','AR Team','GL Team','FP&A'],datasets:[{label:'%',data:[86,78,82,92],backgroundColor:['#f59e0b','#3b82f6','#3b82f6','#ef4444']}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{max:120}},plugins:{legend:{display:false}}}});
+    }
+    document.addEventListener('DOMContentLoaded',()=>{renderClusters();renderTeam();renderTaskBtns();initCharts();});
+    </script>
+</body>
+</html>
