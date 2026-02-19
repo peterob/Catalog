@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinEventCore™ Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 20px; }
+        .header { background: #2c7da0; color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; }
+        .toggle { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .btn { padding: 12px 24px; border: 2px solid #2c7da0; background: white; color: #2c7da0; border-radius: 6px; cursor: pointer; margin-right: 10px; font-weight: 600; }
+        .btn.active { background: #2c7da0; color: white; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2c7da0; }
+        .expense { border-left-color: #2a9d8f; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #e9ecef; padding: 12px; text-align: left; font-weight: 600; }
+        td { padding: 12px; border-bottom: 1px solid #e9ecef; }
+        .total { font-weight: 700; background: #f8f9fa; }
+        .positive { color: #28a745; }
+        .negative { color: #dc3545; }
+        .callout { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-top: 20px; }
+        .enhancement { background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>FinEventCore™</h1>
+        <p>Event-Based Financial System - Interactive Demo</p>
+    </div>
+
+    <div class="toggle">
+        <button class="btn active" onclick="show('events')">Event-Based Transactions</button>
+        <button class="btn" onclick="show('reports')">📊 Reporting Comparison</button>
+    </div>
+
+    <div id="events" class="view active">
+        <div class="card expense">
+            <h3>$50,000 - Digital Campaign Agency Payment</h3>
+            <p><strong>Vendor:</strong> Creative Partners LLC</p>
+            <p><strong>Initiative:</strong> Enterprise Growth</p>
+            <p><strong>Performance:</strong> 150 leads @ $333/lead</p>
+        </div>
+        <div class="card">
+            <h3>$120,000 - Annual Software License Renewal</h3>
+            <p><strong>Customer:</strong> Acme Corporation</p>
+            <p><strong>Growth:</strong> 15% increase ($15,652 additional ARR)</p>
+        </div>
+    </div>
+
+    <div id="reports" class="view">
+        <div class="card">
+            <h3>📊 Traditional Transaction-Based Report</h3>
+            <p><strong>Marketing Department - March 2025</strong></p>
+            <table>
+                <tr><th>Account</th><th style="text-align:right">Amount</th><th style="text-align:right">Variance</th></tr>
+                <tr><td>Advertising</td><td style="text-align:right">$78,500</td><td style="text-align:right" class="positive">+$3,500</td></tr>
+                <tr><td>Agency Fees</td><td style="text-align:right">$50,000</td><td style="text-align:right" class="negative">-$2,000</td></tr>
+                <tr><td>Materials</td><td style="text-align:right">$12,300</td><td style="text-align:right" class="negative">-$700</td></tr>
+                <tr><td>Events</td><td style="text-align:right">$25,450</td><td style="text-align:right" class="positive">+$5,450</td></tr>
+                <tr class="total"><td>TOTAL</td><td style="text-align:right">$166,250</td><td style="text-align:right" class="positive">+$6,250</td></tr>
+            </table>
+            <div class="callout">
+                <h4>⚠️ What This Report CANNOT Tell You:</h4>
+                <ul>
+                    <li>Which initiatives are driving spend?</li>
+                    <li>What business results did we get?</li>
+                    <li>Which campaigns are most cost-effective?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🎯 Event-Based Strategic Performance Report</h3>
+            <p><strong>Marketing by Initiative - March 2025</strong></p>
+            <table>
+                <tr><th>Initiative</th><th style="text-align:right">Investment</th><th style="text-align:right">Leads</th><th style="text-align:right">Cost/Lead</th><th style="text-align:right">CAC</th></tr>
+                <tr><td>Enterprise Growth</td><td style="text-align:right">$105,750</td><td style="text-align:right">310</td><td style="text-align:right">$341</td><td style="text-align:right">$6,221</td></tr>
+                <tr><td>SMB Expansion</td><td style="text-align:right">$35,500</td><td style="text-align:right">124</td><td style="text-align:right">$286</td><td style="text-align:right">$4,438</td></tr>
+                <tr><td>Product Launch</td><td style="text-align:right">$25,000</td><td style="text-align:right">67</td><td style="text-align:right">$373</td><td style="text-align:right">$6,250</td></tr>
+                <tr class="total"><td>TOTAL</td><td style="text-align:right">$166,250</td><td style="text-align:right">501</td><td style="text-align:right">$332</td><td style="text-align:right">$5,733</td></tr>
+            </table>
+            <div class="enhancement">
+                <h4>✅ Strategic Insights:</h4>
+                <ul>
+                    <li><strong>SMB Expansion most efficient:</strong> Lowest CAC at $4,438</li>
+                    <li><strong>Enterprise Growth drives volume:</strong> 62% of all leads</li>
+                    <li><strong>ROI tracking enabled:</strong> Direct link to business outcomes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function show(id) {
+            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>

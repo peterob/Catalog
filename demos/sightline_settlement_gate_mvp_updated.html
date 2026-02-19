@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sightline MVP — Settlement Gate (Quantity Variance)</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: #0b0d12;
+      color: #e8ecf3;
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    header { display:flex; gap:16px; align-items:flex-start; justify-content: space-between; margin-bottom: 18px; }
+    .title { display:flex; flex-direction:column; gap:6px; }
+    .title h1 { margin:0; font-size: 18px; letter-spacing: 0.2px; }
+    .title p { margin:0; color:#b8c0d4; font-size: 13px; line-height: 1.35; }
+
+    .grid { display:grid; grid-template-columns: 1.2fr 0.8fr; gap: 14px; }
+    .card {
+      background: #111521;
+      border: 1px solid #1c2234;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+    }
+    .card h2 { margin:0 0 10px; font-size: 14px; color:#dbe3f7; }
+    .sub { color:#b8c0d4; font-size: 12px; margin-top: -6px; margin-bottom: 10px; }
+
+    .row { display:flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .row > * { flex: 0 0 auto; }
+    button, input, select {
+      border-radius: 10px;
+      border: 1px solid #26304a;
+      background: #0f1320;
+      color: #e8ecf3;
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+    button { cursor:pointer; }
+    button:hover { border-color:#3a4a75; }
+    button.primary { background:#1b2a4d; border-color:#3453a3; }
+    button.danger { background:#2b1620; border-color:#7a2b42; }
+    button.ghost { background:transparent; }
+    input { width: 120px; }
+    select { padding-right: 34px; }
+    .pill {
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px; border-radius: 999px;
+      border: 1px solid #26304a; background:#0f1320;
+      font-size: 12px; color:#cfd7ea;
+    }
+    .pill strong { color:#fff; font-weight: 600; }
+    .status {
+      display:flex; flex-direction:column; gap:8px;
+      padding: 12px; border-radius: 12px; border: 1px solid #26304a;
+      background: #0f1320;
+    }
+    .status .headline { display:flex; justify-content:space-between; align-items:center; gap: 10px; }
+    .badge {
+      font-size: 11px; padding: 6px 10px; border-radius: 999px; border: 1px solid #26304a;
+      background: #0b0d12;
+      color:#cfd7ea;
+      white-space: nowrap;
+    }
+    .badge.ok { border-color:#2d7a56; color:#baf2d5; background:#0c1812; }
+    .badge.blocked { border-color:#7a2b42; color:#ffd0dd; background:#1a0c12; }
+
+    .timeline { display:flex; flex-direction:column; gap: 10px; }
+    .evt {
+      display:grid;
+      grid-template-columns: 74px 1fr auto;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid #1c2234;
+      background: #0f1320;
+      border-radius: 12px;
+    }
+    .evt .t { color:#b8c0d4; font-size: 12px; }
+    .evt .k { font-weight: 650; font-size: 13px; color:#e8ecf3; }
+    .evt .m { color:#b8c0d4; font-size: 12px; margin-top: 2px; }
+    .evt .r { color:#b8c0d4; font-size: 12px; text-align:right; }
+
+    .kv { width:100%; border-collapse: collapse; font-size: 13px; }
+    .kv td { padding: 9px 8px; border-bottom: 1px dashed #24304a; }
+    .kv td:first-child { color:#b8c0d4; }
+    .kv td:last-child { text-align:right; font-variant-numeric: tabular-nums; }
+    .kv tr:last-child td { border-bottom: none; }
+
+    .callout {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #26304a;
+      background: #0f1320;
+      color:#cfd7ea;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .callout strong { color:#fff; }
+    .muted { color:#b8c0d4; font-size: 12px; }
+    .footer { margin-top: 14px; display:flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .smalllink { color:#b8c0d4; text-decoration:none; font-size: 12px; }
+    .smalllink:hover { color:#e8ecf3; }
+
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; }
+      input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Settlement Gate MVP — Quantity Variance</h1>
+        <p>One-screen demo: append-only events → invariant evaluation → payment blocked or released.</p>
+      </div>
+      <div class="row">
+        <span class="pill"><strong>Ledger</strong> <span id="ledgerId"></span></span>
+        <button class="ghost" id="resetBtn" title="Reset to default demo data">Reset</button>
+        <button class="ghost" id="loadBlockedBtn" title="Load a pre-built blocked scenario">Load Blocked</button>
+        <button class="ghost" id="loadResolvedBtn" title="Load a resolved scenario">Load Resolved</button>
+        <button class="ghost" id="clearBtn" title="Clear all events">Clear</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Timeline + Controls -->
+      <section class="card">
+        <h2>Event Timeline (Append-Only)</h2>
+        <div class="sub">Use controls to add events. “Attempt Payment” triggers the settlement gate.</div>
+
+        <div class="card" style="padding:12px; margin-bottom:12px;">
+          <div class="row" style="justify-content: space-between;">
+            <div class="row">
+              <select id="eventType">
+                <option value="GOODS_SHIPPED">GOODS_SHIPPED</option>
+                <option value="GOODS_RECEIVED">GOODS_RECEIVED</option>
+                <option value="GOODS_DAMAGED">GOODS_DAMAGED</option>
+                <option value="VARIANCE_DECLARED">VARIANCE_DECLARED</option>
+                <option value="INVOICE_SUBMITTED">INVOICE_SUBMITTED</option>
+              </select>
+
+              <input id="qty" type="number" min="0" step="1" placeholder="qty" />
+              <select id="actor">
+                <option value="Buyer">Buyer</option>
+                <option value="Supplier">Supplier</option>
+                <option value="System">System</option>
+              </select>
+              <button id="addEventBtn">Add Event</button>
+            </div>
+
+            <div class="row">
+              <button class="primary" id="attemptPaymentBtn">Attempt Payment</button>
+              <button class="danger" id="forcePayBtn" title="For demo only. Shows why bypass is logged.">Bypass (Log Only)</button>
+            </div>
+          </div>
+          <div class="muted" style="margin-top:10px;">
+            Tip: Try shipped 500, received 480, invoice → attempt payment → blocked. Then declare variance 20 → attempt payment → released.
+          </div>
+
+          <div class="card" style="padding:12px; margin-top:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap;">
+              <div style="display:flex; flex-direction:column; gap:4px;">
+                <div style="font-size:13px; font-weight:650;">Ingest CSV → Events</div>
+                <div class="muted">Upload a CSV and map rows into events. Two supported templates: <span style="white-space:nowrap;">(A) Event Rows</span> or <span style="white-space:nowrap;">(B) Quantities Snapshot</span>.</div>
+              </div>
+              <div class="row">
+                <a class="smalllink" href="#" id="downloadTemplateA">Download Template A</a>
+                <a class="smalllink" href="#" id="downloadTemplateB">Download Template B</a>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <input id="csvFile" type="file" accept=".csv,text/csv" style="padding:9px 10px; width: 260px;" />
+              <select id="csvMode">
+                <option value="auto">Auto-detect</option>
+                <option value="A">Template A (Event Rows)</option>
+                <option value="B">Template B (Quantities Snapshot)</option>
+              </select>
+              <button id="importCsvBtn">Import CSV</button>
+              <button class="ghost" id="clearAndImportBtn" title="Clears current events then imports CSV">Clear + Import</button>
+            </div>
+
+            <div id="csvStatus" class="muted" style="margin-top:8px;">No file selected.</div>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content: space-between; margin: 6px 0 10px;">
+          <span class="muted">Display</span>
+          <label class="pill" style="cursor:pointer; user-select:none;">
+            <input id="toggleSystem" type="checkbox" checked style="width:auto; margin:0;" />
+            <span>Show System Events</span>
+          </label>
+        </div>
+        <div id="timeline" class="timeline"></div>
+
+        <div class="footer">
+          <a class="smalllink" href="#" id="exportBtn">Export events as JSON</a>
+          <span class="muted">No backend. State persists locally in this browser (localStorage).</span>
+        </div>
+      </section>
+
+      <!-- Right: Invariant + Status -->
+      <aside class="card">
+        <h2>Invariant State</h2>
+        <div class="sub">Payment is allowed only when shipped = received + damaged + variance.</div>
+
+        <div class="status" id="statusBox">
+          <div class="headline">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <div style="font-size:13px; font-weight:650;">Settlement Gate</div>
+              <div class="muted" id="gateExplain">—</div>
+            </div>
+            <span class="badge" id="badge">—</span>
+          </div>
+          <div class="muted">Current balance</div>
+          <table class="kv" aria-label="Invariant breakdown">
+            <tr><td>Shipped</td><td id="shipped">0</td></tr>
+            <tr><td>Received</td><td id="received">0</td></tr>
+            <tr><td>Damaged</td><td id="damaged">0</td></tr>
+            <tr><td>Variance Declared</td><td id="variance">0</td></tr>
+            <tr><td style="font-weight:650;">Unattributed</td><td id="unattributed" style="font-weight:650;">0</td></tr>
+          </table>
+        </div>
+
+        <div class="callout" id="actionBox">
+          <strong>Action required:</strong>
+          <div style="margin-top:6px;" id="nextAction">—</div>
+        </div>
+
+        <div class="callout">
+          <strong>Invariant (enforced):</strong>
+          <div style="margin-top:8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; color:#cfd7ea;">
+            shipped = received + damaged + variance_declared
+          </div>
+          <div class="muted" style="margin-top:10px;">
+            If this does not hold, the system logs <code>PAYMENT_BLOCKED</code>.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Demo State ----------
+    const ledger = {
+      ledger_id: "PO-4567",
+      events: []
+    };
+
+    const STORAGE_KEY = "sightline_settlement_gate_demo_v1";
+
+    function saveToLocal() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ledger_id: ledger.ledger_id, events: ledger.events }));
+      } catch (e) { /* ignore */ }
+    }
+
+    function loadFromLocal() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const obj = JSON.parse(raw);
+        if (!obj || !Array.isArray(obj.events)) return false;
+        ledger.ledger_id = obj.ledger_id || ledger.ledger_id;
+        ledger.events = obj.events;
+        return true;
+      } catch (e) { return false; }
+    }
+
+    async function sha256Hex(text) {
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest("SHA-256", enc);
+      const bytes = Array.from(new Uint8Array(buf));
+      return bytes.map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    const TYPES = {
+      PO_CREATED: "PO_CREATED",
+      GOODS_SHIPPED: "GOODS_SHIPPED",
+      GOODS_RECEIVED: "GOODS_RECEIVED",
+      GOODS_DAMAGED: "GOODS_DAMAGED",
+      VARIANCE_DECLARED: "VARIANCE_DECLARED",
+      INVOICE_SUBMITTED: "INVOICE_SUBMITTED",
+      PAYMENT_ATTEMPTED: "PAYMENT_ATTEMPTED",
+      PAYMENT_BLOCKED: "PAYMENT_BLOCKED",
+      PAYMENT_RELEASED: "PAYMENT_RELEASED",
+      PAYMENT_BYPASSED: "PAYMENT_BYPASSED"
+    };
+
+    function nowHHMM() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    function uid() {
+      return Math.random().toString(16).slice(2) + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function appendEvent(event_type, { quantity = null, actor = "System", metadata = {} } = {}) {
+      ledger.events.push({
+        event_id: uid(),
+        ts: new Date().toISOString(),
+        t: nowHHMM(),
+        event_type,
+        quantity,
+        actor,
+        metadata
+      });
+      render();
+      saveToLocal();
+    }
+
+    // ---------- Invariant Engine ----------
+    function sumQty(type) {
+      return ledger.events
+        .filter(e => e.event_type === type)
+        .reduce((acc, e) => acc + (Number(e.quantity) || 0), 0);
+    }
+
+    function invariantState() {
+      const shipped = sumQty(TYPES.GOODS_SHIPPED);
+      const received = sumQty(TYPES.GOODS_RECEIVED);
+      const damaged = sumQty(TYPES.GOODS_DAMAGED);
+      const variance = sumQty(TYPES.VARIANCE_DECLARED);
+
+      const rhs = received + damaged + variance;
+      const unattributed = Math.max(0, shipped - rhs);
+
+      const holds = shipped > 0 && (shipped === rhs);
+      return { shipped, received, damaged, variance, rhs, unattributed, holds };
+    }
+
+    function attemptPayment() {
+      appendEvent(TYPES.PAYMENT_ATTEMPTED, { actor: "System" });
+      const s = invariantState();
+      if (s.holds) {
+        appendEvent(TYPES.PAYMENT_RELEASED, { actor: "System", metadata: { reason: "Invariant holds" } });
+      } else {
+        appendEvent(TYPES.PAYMENT_BLOCKED, {
+          actor: "System",
+          metadata: {
+            reason: "Invariant violation",
+            detail: `Unattributed quantity: ${s.unattributed}`
+          }
+        });
+      }
+    }
+
+    // For demo: shows that bypass is always logged (and you'd flag it)
+    function bypassPayment() {
+      appendEvent(TYPES.PAYMENT_BYPASSED, { actor: "System", metadata: { note: "Bypass logged for audit/alerting" } });
+    }
+
+    // ---------- Rendering ----------
+    function renderTimeline() {
+      const timeline = document.getElementById("timeline");
+      timeline.innerHTML = "";
+
+      const showSystem = document.getElementById('toggleSystem')?.checked ?? true;
+      const events = [...ledger.events].slice().reverse().filter(e => showSystem ? true : (e.actor !== 'System')); // newest first
+      if (events.length === 0) {
+        timeline.appendChild(Object.assign(document.createElement("div"), { className: "muted", textContent: "No events yet. Add one above." }));
+        return;
+      }
+
+      for (const e of events) {
+        const qtyPart = (e.quantity === null || e.quantity === undefined || e.quantity === "") ? "" : `qty=${e.quantity}`;
+        const metaObj = (e.metadata && typeof e.metadata === "object") ? e.metadata : {};
+        const metaPart = Object.keys(metaObj).length ? JSON.stringify(metaObj) : "";
+        const srcBits = [];
+        if (metaObj.source_system) srcBits.push(`system=${metaObj.source_system}`);
+        if (metaObj.source_record_id) srcBits.push(`record=${metaObj.source_record_id}`);
+        if (metaObj.source_ts) srcBits.push(`ts=${metaObj.source_ts}`);
+        if (metaObj.source_file) srcBits.push(`file=${metaObj.source_file}`);
+        if (metaObj.source_row) srcBits.push(`row=${metaObj.source_row}`);
+        if (metaObj.source_file_sha256) srcBits.push(`sha256=${String(metaObj.source_file_sha256).slice(0,10)}…`);
+        const srcPart = srcBits.length ? `source: ${srcBits.join(" • ")}` : "";
+
+        const evt = document.createElement("div");
+        evt.className = "evt";
+
+        const t = document.createElement("div");
+        t.className = "t";
+        t.textContent = e.t;
+
+        const mid = document.createElement("div");
+        const k = document.createElement("div");
+        k.className = "k";
+        k.textContent = e.event_type;
+        const m = document.createElement("div");
+        m.className = "m";
+        m.textContent = [qtyPart, srcPart, metaPart].filter(Boolean).join("  •  ") || "—";
+        mid.appendChild(k);
+        mid.appendChild(m);
+
+        const r = document.createElement("div");
+        r.className = "r";
+        r.textContent = e.actor;
+
+        evt.appendChild(t);
+        evt.appendChild(mid);
+        evt.appendChild(r);
+
+        timeline.appendChild(evt);
+      }
+    }
+
+    function renderInvariant() {
+      const s = invariantState();
+      document.getElementById("shipped").textContent = s.shipped;
+      document.getElementById("received").textContent = s.received;
+      document.getElementById("damaged").textContent = s.damaged;
+      document.getElementById("variance").textContent = s.variance;
+      document.getElementById("unattributed").textContent = s.unattributed;
+
+      const badge = document.getElementById("badge");
+      const explain = document.getElementById("gateExplain");
+      const nextAction = document.getElementById("nextAction");
+
+      if (s.shipped === 0) {
+        badge.className = "badge";
+        badge.textContent = "WAITING";
+        explain.textContent = "No shipment recorded yet.";
+        nextAction.textContent = "Add GOODS_SHIPPED to start the ledger.";
+        return;
+      }
+
+      if (s.holds) {
+        badge.className = "badge ok";
+        badge.textContent = "ALLOW_PAYMENT";
+        explain.textContent = "Invariant holds. Payment can be released.";
+        nextAction.textContent = "Attempt Payment to emit PAYMENT_RELEASED.";
+      } else {
+        badge.className = "badge blocked";
+        badge.textContent = "BLOCK_PAYMENT";
+        explain.textContent = "Invariant violated. Cash cannot move.";
+        nextAction.innerHTML =
+          `Missing attribution for <strong>${s.unattributed}</strong> units.<br/>` +
+          `Next: add <code>VARIANCE_DECLARED</code> (or <code>GOODS_DAMAGED</code>) to balance shipped quantity.`;
+      }
+    }
+
+    function render() {
+      document.getElementById("ledgerId").textContent = ledger.ledger_id;
+      renderTimeline();
+      renderInvariant();
+    }
+
+    // ---------- Controls ----------
+    function seedDefault() {
+      ledger.events = [];
+      appendEvent(TYPES.PO_CREATED, { actor: "Buyer", metadata: { po: ledger.ledger_id, line_items: 1 } });
+      appendEvent(TYPES.GOODS_SHIPPED, { actor: "Supplier", quantity: 500, metadata: { shipment: "SHP-001" } });
+      appendEvent(TYPES.GOODS_RECEIVED, { actor: "Buyer", quantity: 480, metadata: { receipt: "RCV-001" } });
+      appendEvent(TYPES.INVOICE_SUBMITTED, { actor: "Supplier", metadata: { invoice: "INV-123" } });
+      appendEvent(TYPES.PAYMENT_ATTEMPTED, { actor: "System" });
+      appendEvent(TYPES.PAYMENT_BLOCKED, { actor: "System", metadata: { reason: "Invariant violation", detail: "Unattributed quantity: 20" } });
+    }
+
+    document.getElementById("addEventBtn").addEventListener("click", () => {
+      const type = document.getElementById("eventType").value;
+      const qtyInput = document.getElementById("qty").value;
+      const actor = document.getElementById("actor").value;
+
+      const needsQty = [TYPES.GOODS_SHIPPED, TYPES.GOODS_RECEIVED, TYPES.GOODS_DAMAGED, TYPES.VARIANCE_DECLARED].includes(type);
+      const quantity = needsQty ? (qtyInput === "" ? null : Number(qtyInput)) : null;
+
+      const metadata = {};
+      if (type === TYPES.VARIANCE_DECLARED && quantity !== null) metadata.reason = "Quantity variance";
+      if (type === TYPES.GOODS_DAMAGED && quantity !== null) metadata.evidence = "Photo/packing slip";
+
+      appendEvent(type, { quantity, actor, metadata });
+      document.getElementById("qty").value = "";
+    });
+
+    document.getElementById("attemptPaymentBtn").addEventListener("click", attemptPayment);
+    const tgl = document.getElementById('toggleSystem');
+    if (tgl) tgl.addEventListener('change', render);
+    document.getElementById("forcePayBtn").addEventListener("click", bypassPayment);
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      seedDefault();
+      render();
+      saveToLocal();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      const blob = new Blob([JSON.stringify({ ledger_id: ledger.ledger_id, events: ledger.events }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${ledger.ledger_id}-events.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+
+    // ---------- CSV Ingestion ----------
+    let IMPORT_CTX = null;
+    function parseCSV(text) {
+      // Minimal CSV parser: handles quotes and commas; not intended for every edge case.
+      const rows = [];
+      let row = [];
+      let cur = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (ch === '"' && inQuotes && next === '"') { // escaped quote
+          cur += '"';
+          i++;
+          continue;
+        }
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        if (ch === ',' && !inQuotes) {
+          row.push(cur.trim());
+          cur = "";
+          continue;
+        }
+        if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && next === '\n') i++;
+          row.push(cur.trim());
+          cur = "";
+          if (row.length === 1 && row[0] === "") { row = []; continue; }
+          rows.push(row);
+          row = [];
+          continue;
+        }
+        cur += ch;
+      }
+      if (cur.length || row.length) {
+        row.push(cur.trim());
+        if (!(row.length === 1 && row[0] === "")) rows.push(row);
+      }
+      return rows;
+    }
+
+    function csvToObjects(rows) {
+      if (!rows || rows.length < 2) return [];
+      const header = rows[0].map(h => (h || "").trim());
+      const objs = [];
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        if (!r || r.every(c => (c || "").trim() === "")) continue;
+        const o = {};
+        for (let j = 0; j < header.length; j++) {
+          o[header[j]] = (r[j] ?? "").trim();
+        }
+        objs.push(o);
+      }
+      return objs;
+    }
+
+    function detectTemplate(objs) {
+      if (!objs.length) return "unknown";
+      const keys = Object.keys(objs[0]).map(k => k.toLowerCase());
+      if (keys.includes("event_type") && (keys.includes("quantity") || keys.includes("qty"))) return "A";
+      if (keys.includes("shipped_qty") || keys.includes("received_qty")) return "B";
+      return "unknown";
+    }
+
+    function importTemplateA(objs) {
+      let count = 0;
+      for (const o of objs) {
+        const et = (o.event_type || o.Event_Type || "").trim();
+        if (!et) continue;
+
+        const qtyRaw = (o.quantity || o.qty || "").trim();
+        const quantity = qtyRaw === "" ? null : Number(qtyRaw);
+        const actor = (o.actor || o.Actor || "System").trim() || "System";
+        const metadataRaw = (o.metadata || o.Metadata || "").trim();
+        let metadata = {};
+        if (metadataRaw) {
+          try { metadata = JSON.parse(metadataRaw); }
+          catch { metadata = { note: metadataRaw }; }
+        }
+
+        const ts = (o.ts || o.timestamp || "").trim();
+        if (ts) metadata.source_ts = ts;
+
+        if (IMPORT_CTX) {
+          metadata.source_system = metadata.source_system || IMPORT_CTX.source_system;
+          metadata.source_file = metadata.source_file || IMPORT_CTX.source_file;
+          metadata.source_file_sha256 = metadata.source_file_sha256 || IMPORT_CTX.source_file_sha256;
+          metadata.source_row = metadata.source_row || (count + 2);
+        }
+        appendEvent(et, { quantity: isNaN(quantity) ? null : quantity, actor, metadata });
+        count++;
+      }
+      return count;
+    }
+
+    function importTemplateB(objs) {
+      let count = 0;
+      for (const o of objs) {
+        const actor = (o.actor || "System").trim() || "System";
+        const ts = (o.ts || o.date || o.timestamp || "").trim();
+
+        function emitIf(field, eventType, extraMeta = {}) {
+          const raw = (o[field] ?? "").trim();
+          if (raw === "") return;
+          const q = Number(raw);
+          if (isNaN(q)) return;
+          const metadata = { ...extraMeta };
+          if (ts) metadata.source_ts = ts;
+          if (IMPORT_CTX) {
+            metadata.source_system = metadata.source_system || IMPORT_CTX.source_system;
+            metadata.source_file = metadata.source_file || IMPORT_CTX.source_file;
+            metadata.source_file_sha256 = metadata.source_file_sha256 || IMPORT_CTX.source_file_sha256;
+            metadata.source_row = metadata.source_row || (count + 2);
+          }
+          appendEvent(eventType, { quantity: q, actor, metadata });
+          count++;
+        }
+
+        emitIf("shipped_qty", TYPES.GOODS_SHIPPED, { source: "CSV" });
+        emitIf("received_qty", TYPES.GOODS_RECEIVED, { source: "CSV" });
+        emitIf("damaged_qty", TYPES.GOODS_DAMAGED, { source: "CSV" });
+        emitIf("variance_qty", TYPES.VARIANCE_DECLARED, { source: "CSV", reason: "Quantity variance" });
+
+        const invoice = (o.invoice_submitted || "").trim().toLowerCase();
+        if (invoice === "true" || invoice === "yes" || invoice === "1") {
+          const metadata = { source: "CSV" };
+          if (ts) metadata.source_ts = ts;
+          if (IMPORT_CTX) {
+          metadata.source_system = metadata.source_system || IMPORT_CTX.source_system;
+          metadata.source_file = metadata.source_file || IMPORT_CTX.source_file;
+          metadata.source_file_sha256 = metadata.source_file_sha256 || IMPORT_CTX.source_file_sha256;
+          metadata.source_row = metadata.source_row || (count + 2);
+        }
+        appendEvent(TYPES.INVOICE_SUBMITTED, { actor, metadata });
+          count++;
+        }
+      }
+      return count;
+    }
+
+    function setCsvStatus(msg) {
+      const el = document.getElementById("csvStatus");
+      if (el) el.textContent = msg;
+    }
+
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function templateAString() {
+      return [
+        "event_type,quantity,actor,ts,metadata",
+        "PO_CREATED,,Buyer,2026-01-23T14:00:00Z,\"{\\\"po\\\":\\\"PO-4567\\\",\\\"line_items\\\":1}\"",
+        "GOODS_SHIPPED,500,Supplier,2026-01-23T14:05:00Z,\"{\\\"shipment\\\":\\\"SHP-001\\\"}\"",
+        "GOODS_RECEIVED,480,Buyer,2026-01-23T16:10:00Z,\"{\\\"receipt\\\":\\\"RCV-001\\\"}\"",
+        "INVOICE_SUBMITTED,,Supplier,2026-01-23T17:00:00Z,\"{\\\"invoice\\\":\\\"INV-123\\\"}\"",
+        "PAYMENT_ATTEMPTED,,System,2026-01-23T17:02:00Z,\"{}\""
+      ].join("\n");
+    }
+
+    function templateBString() {
+      return [
+        "ts,actor,shipped_qty,received_qty,damaged_qty,variance_qty,invoice_submitted",
+        "2026-01-23T14:05:00Z,Supplier,500,,,,",
+        "2026-01-23T16:10:00Z,Buyer,,480,,,",
+        "2026-01-23T17:00:00Z,Supplier,,,,,true",
+        "2026-01-23T17:05:00Z,Buyer,,,,20,"
+      ].join("\n");
+    }
+
+    const csvFile = document.getElementById("csvFile");
+    if (csvFile) {
+      csvFile.addEventListener("change", () => {
+        const f = csvFile.files && csvFile.files[0];
+        setCsvStatus(f ? `Selected: ${f.name} (${Math.round(f.size/1024)} KB)` : "No file selected.");
+      });
+    }
+
+    const dlA = document.getElementById("downloadTemplateA");
+    if (dlA) dlA.addEventListener("click", (e) => { e.preventDefault(); downloadText("template_A_event_rows.csv", templateAString()); });
+
+    const dlB = document.getElementById("downloadTemplateB");
+    if (dlB) dlB.addEventListener("click", (e) => { e.preventDefault(); downloadText("template_B_quantities_snapshot.csv", templateBString()); });
+
+    function doImport({ clearFirst = false } = {}) {
+      const f = csvFile && csvFile.files && csvFile.files[0];
+      if (!f) { setCsvStatus("Select a CSV file first."); return; }
+
+      const mode = (document.getElementById("csvMode")?.value || "auto").toUpperCase();
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const text = String(reader.result || "");
+          const fileSha = await sha256Hex(text);
+          const fileName = f.name;
+          const rows = parseCSV(text);
+          const objs = csvToObjects(rows);
+
+          if (clearFirst) ledger.events = [];
+
+          const tpl = (mode === "AUTO") ? detectTemplate(objs) : mode;
+          if (tpl === "unknown") {
+            setCsvStatus("Could not detect template. Ensure headers match Template A or B.");
+            render();
+      saveToLocal();
+            return;
+          }
+
+          let n = 0;
+          IMPORT_CTX = { source_system: "CSV", source_file: fileName, source_file_sha256: fileSha };
+          if (tpl === "A") n = importTemplateA(objs);
+          else if (tpl === "B") n = importTemplateB(objs);
+          IMPORT_CTX = null;
+
+          setCsvStatus(`Imported ${n} event(s) from ${f.name} using Template ${tpl}.`);
+          render();
+      saveToLocal();
+        } catch (err) {
+          setCsvStatus(`Import failed: ${err?.message || err}`);
+        }
+      };
+      reader.onerror = () => setCsvStatus("Import failed: unable to read file.");
+      reader.readAsText(f);
+    }
+
+    const importBtn = document.getElementById("importCsvBtn");
+    if (importBtn) importBtn.addEventListener("click", () => doImport({ clearFirst: false }));
+
+    const clearImportBtn = document.getElementById("clearAndImportBtn");
+    if (clearImportBtn) clearImportBtn.addEventListener("click", () => doImport({ clearFirst: true }));
+
+
+    // ---------- Boot ----------
+    const loaded = loadFromLocal();
+    if (!loaded) seedDefault();
+    render();
+    saveToLocal();
+  </script>
+</body>
+</html>
