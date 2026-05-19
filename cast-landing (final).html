@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAST — Bilateral coordination for commercial payments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f6f9fc;
+    --ink: #0a2540;
+    --ink-soft: #425466;
+    --ink-faint: #697386;
+    --line: #e6ebf1;
+    --accent: #635bff;
+    --accent-deep: #0a2540;
+    --green: #15be53;
+    --amber: #f5a623;
+    --code-bg: #0a2540;
+    --code-ink: #cdd5e0;
+    --radius: 10px;
+    --maxw: 1140px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Sora', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- gradient hero canvas ---------- */
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(900px 500px at 88% -10%, rgba(99,91,255,0.16), transparent 60%),
+      radial-gradient(700px 600px at 5% 0%, rgba(21,190,83,0.08), transparent 55%),
+      linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 78%);
+    z-index: -1;
+  }
+  .hero-bg::after {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(10,37,64,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(10,37,64,0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.7), transparent 70%);
+  }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: saturate(180%) blur(10px);
+    background: rgba(255,255,255,0.72);
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s;
+  }
+  nav.scrolled { border-color: var(--line); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; letter-spacing: -0.02em; }
+  .logo .mark {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--accent), #4b45c6);
+    display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700;
+  }
+  .nav-links { display: flex; align-items: center; gap: 30px; font-size: 14.5px; font-weight: 500; color: var(--ink-soft); }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--accent-deep); color: #fff; padding: 8px 16px;
+    border-radius: 999px; font-size: 14px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px; transition: transform .15s, background .15s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); background: #15324f; }
+  @media(max-width: 800px){ .nav-links a:not(.nav-cta){ display:none; } }
+
+  /* ---------- hero ---------- */
+  header.hero { position: relative; padding: 96px 0 80px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--accent);
+    background: rgba(99,91,255,0.09); padding: 6px 13px; border-radius: 999px;
+    margin-bottom: 26px; letter-spacing: -0.01em;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1 {
+    font-size: clamp(38px, 5.4vw, 66px);
+    line-height: 1.04; letter-spacing: -0.035em; font-weight: 700;
+    max-width: 13ch;
+  }
+  h1 .grad {
+    background: linear-gradient(110deg, var(--accent) 10%, #00c2a8 90%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede {
+    margin-top: 26px; font-size: clamp(17px, 1.6vw, 20px);
+    color: var(--ink-soft); max-width: 56ch; line-height: 1.6;
+  }
+  .hero-actions { display: flex; gap: 14px; margin-top: 38px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 24px; border-radius: 999px; font-size: 15px; font-weight: 600;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(99,91,255,0.35); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(99,91,255,0.42); }
+  .btn-ghost { color: var(--ink); border: 1px solid var(--line); background: #fff; }
+  .btn-ghost:hover { transform: translateY(-2px); border-color: #c9d2dd; }
+  .btn .arrow { transition: transform .15s; }
+  .btn:hover .arrow { transform: translateX(3px); }
+
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+  @media(max-width: 940px){ .hero-grid { grid-template-columns: 1fr; gap: 44px; } }
+
+  /* ---------- code window ---------- */
+  .code-card {
+    background: var(--code-bg); border-radius: 14px;
+    box-shadow: 0 24px 60px -18px rgba(10,37,64,0.45), 0 0 0 1px rgba(255,255,255,0.04);
+    overflow: hidden; font-size: 13px;
+  }
+  .code-top {
+    display: flex; align-items: center; gap: 7px; padding: 13px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .code-top .c { width: 11px; height: 11px; border-radius: 50%; }
+  .c.r{background:#ff5f57;} .c.y{background:#febc2e;} .c.g{background:#28c840;}
+  .code-top .file { margin-left: 10px; color: #7d8aa3; font-size: 12px; font-family:'IBM Plex Mono',monospace; }
+  pre.code { padding: 20px 22px; overflow-x: auto; line-height: 1.75; font-family: 'IBM Plex Mono', monospace; }
+  pre.code code { color: var(--code-ink); }
+  .t-key{color:#7dd3fc;} .t-str{color:#86efac;} .t-com{color:#5b6b85;} .t-fn{color:#c4b5fd;} .t-num{color:#fbbf24;} .t-punc{color:#8ba0bd;}
+
+  /* ---------- logos / proof strip ---------- */
+  .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg-soft); }
+  .strip-inner { display: flex; align-items: center; justify-content: space-between; padding: 28px 24px; gap: 40px; flex-wrap: wrap; }
+  .strip-label { font-size: 12.5px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+  .strip-stats { display: flex; gap: 52px; flex-wrap: wrap; }
+  .stat .n { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat .l { font-size: 13px; color: var(--ink-faint); margin-top: 2px; }
+
+  /* ---------- section scaffold ---------- */
+  section.block { padding: 96px 0; }
+  .sec-head { max-width: 60ch; margin-bottom: 56px; }
+  .sec-tag { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: -0.01em; margin-bottom: 14px; }
+  h2 { font-size: clamp(28px, 3.4vw, 40px); letter-spacing: -0.03em; line-height: 1.12; font-weight: 700; }
+  .sec-sub { margin-top: 16px; font-size: 17px; color: var(--ink-soft); line-height: 1.6; }
+
+  /* ---------- the loop ---------- */
+  .loop { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  @media(max-width:880px){ .loop{ grid-template-columns: 1fr 1fr; } }
+  @media(max-width:540px){ .loop{ grid-template-columns: 1fr; } }
+  .step { padding: 28px 26px; border-right: 1px solid var(--line); position: relative; background: #fff; transition: background .2s; }
+  .step:last-child { border-right: none; }
+  .step:hover { background: var(--bg-soft); }
+  .step .idx { font-family:'IBM Plex Mono',monospace; font-size: 12px; color: var(--accent); font-weight: 500; }
+  .step h3 { font-size: 17px; margin: 14px 0 8px; letter-spacing: -0.02em; }
+  .step p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+  .step .writes { margin-top: 16px; font-family:'IBM Plex Mono',monospace; font-size: 11.5px; color: var(--ink-faint); }
+  .step .writes b { color: var(--ink); }
+  .step.pivot { background: linear-gradient(180deg, rgba(99,91,255,0.05), #fff); }
+  .step.pivot .idx { color: var(--accent); }
+  .pivot-tag { display:inline-block; margin-top:10px; font-size:11px; font-weight:600; color:var(--accent); background:rgba(99,91,255,0.1); padding:3px 9px; border-radius:6px; }
+
+  /* ---------- primitives ---------- */
+  .prim-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+  @media(max-width:880px){ .prim-grid{ grid-template-columns:1fr 1fr; } }
+  @media(max-width:600px){ .prim-grid{ grid-template-columns:1fr; } }
+  .prim {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 26px 24px; background: #fff; transition: transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .prim:hover { transform: translateY(-3px); box-shadow: 0 14px 34px -16px rgba(10,37,64,0.22); border-color: #d6deea; }
+  .prim .pi { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--accent); }
+  .prim h3 { font-size: 19px; margin: 12px 0 8px; letter-spacing: -0.02em; }
+  .prim p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; }
+  .prim .rule { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-faint); }
+  .prim .rule b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- split feature ---------- */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  @media(max-width:880px){ .split{ grid-template-columns:1fr; gap:36px; } }
+  .split h2 { font-size: clamp(26px,3vw,34px); }
+  .split ul { list-style: none; margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .split li { display: flex; gap: 12px; font-size: 15px; color: var(--ink-soft); }
+  .split li .ck {
+    flex: none; width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(21,190,83,0.12); color: var(--green);
+    display: grid; place-items: center; font-size: 12px; margin-top: 1px;
+  }
+  .split li b { color: var(--ink); font-weight: 600; }
+
+  /* attack table */
+  .atk { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .atk-row { display: grid; grid-template-columns: 1.3fr 1fr 1fr; font-size: 14px; }
+  .atk-row > div { padding: 15px 20px; border-bottom: 1px solid var(--line); }
+  .atk-row.h > div { background: var(--bg-soft); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); }
+  .atk-row:last-child > div { border-bottom: none; }
+  .atk .vec { font-weight: 500; color: var(--ink); }
+  .atk .before { color: #c0392b; }
+  .atk .after { color: var(--green); font-weight: 600; }
+  @media(max-width:640px){ .atk-row{ grid-template-columns:1fr; } .atk-row > div{ border-bottom:none; } .atk-row{ border-bottom:1px solid var(--line); padding:6px 0; } }
+
+  /* ---------- CTA ---------- */
+  .cta-block { background: var(--accent-deep); color: #fff; border-radius: 18px; padding: 64px 56px; position: relative; overflow: hidden; }
+  .cta-block::before {
+    content:""; position:absolute; inset:0;
+    background: radial-gradient(600px 300px at 85% 0%, rgba(99,91,255,0.4), transparent 60%);
+  }
+  .cta-block h2 { font-size: clamp(28px,3.4vw,38px); position: relative; max-width: 18ch; }
+  .cta-block p { position: relative; color: #a9b8cc; margin-top: 14px; font-size: 17px; max-width: 50ch; }
+  .cta-actions { position: relative; display: flex; gap: 14px; margin-top: 32px; flex-wrap: wrap; }
+  .cta-block .btn-primary { background: #fff; color: var(--accent-deep); box-shadow: none; }
+  .cta-block .btn-primary:hover { box-shadow: 0 8px 22px rgba(0,0,0,0.25); }
+  .cta-block .btn-ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,0.25); }
+  .cta-block .btn-ghost:hover { border-color: rgba(255,255,255,0.5); }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); padding: 56px 0 64px; }
+  .foot-grid { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+  .foot-brand { max-width: 30ch; }
+  .foot-brand p { color: var(--ink-faint); font-size: 14px; margin-top: 14px; line-height: 1.6; }
+  .foot-cols { display: flex; gap: 64px; flex-wrap: wrap; }
+  .foot-col h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 14px; }
+  .foot-col a { display: block; font-size: 14px; color: var(--ink-soft); margin-bottom: 10px; }
+  .foot-col a:hover { color: var(--ink); }
+  .foot-base { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-faint); flex-wrap: wrap; gap: 12px; }
+
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ===================== WALK-THROUGH ===================== */
+  #walkthrough { --wt-accent: var(--accent); }
+  .wt-intro { padding: 88px 0 36px; }
+  .wt-intro .sec-tag { font-size:13px; font-weight:600; color:var(--accent); margin-bottom:14px; }
+  .wt-intro h2 { font-size: clamp(28px,3.4vw,40px); letter-spacing:-0.03em; line-height:1.12; font-weight:700; }
+  .wt-intro p { margin-top:16px; font-size:17px; color:var(--ink-soft); max-width:62ch; line-height:1.6; }
+
+  /* sticky scroll-spy sub-bar — sits below main nav (64px) */
+  .wt-spy {
+    position: sticky; top: 64px; z-index: 40;
+    background: rgba(10,37,64,0.97); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 54px; border-radius: 0;
+  }
+  .wt-spy-inner { max-width: var(--maxw); margin: 0 auto; width: 100%; display:flex; align-items:center; justify-content:space-between; }
+  .wt-switch { display:inline-flex; background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.16); border-radius:999px; padding:3px; }
+  .wt-switch a {
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase;
+    color: rgba(255,255,255,0.6); padding:6px 18px; border-radius:999px; transition: all .2s; cursor:pointer;
+  }
+  .wt-switch a:hover { color:#fff; }
+  .wt-switch a.active { background:#fff; color:var(--accent-deep); font-weight:600; }
+  .wt-spy .wt-dev { display:flex; align-items:center; gap:8px; font-size:12px; color:rgba(255,255,255,0.7); font-family:'IBM Plex Mono',monospace; }
+  .wt-spy .wt-dev input { accent-color: var(--accent); cursor:pointer; }
+  .wt-spy .wt-dev label { cursor:pointer; }
+  @media(max-width:680px){ .wt-spy{ height:auto; padding:9px 14px; } .wt-spy-inner{ flex-wrap:wrap; gap:8px; } }
+
+  .wt-view { border-bottom:1px solid var(--line); scroll-margin-top: 120px; }
+  .wt-view:nth-child(odd) { background: var(--bg-soft); }
+  .wt-view.buyer    { --accent: #635bff; }
+  .wt-view.seller   { --accent: #0a8f6a; }
+  .wt-view.verifier { --accent: #c0392b; }
+  .wt-head { padding: 64px 0 8px; }
+  .wt-head .badge {
+    display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600;
+    color:var(--accent); background:color-mix(in srgb,var(--accent) 10%,transparent);
+    padding:6px 13px; border-radius:999px; margin-bottom:18px;
+  }
+  .wt-head .badge .d { width:6px;height:6px;border-radius:50%;background:var(--accent); }
+  .wt-head h3 { font-size: clamp(24px,3vw,34px); letter-spacing:-0.03em; font-weight:700; line-height:1.12; max-width:20ch; }
+  .wt-head .who { margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-faint); }
+  .wt-head .lede { margin-top:18px; font-size:16px; color:var(--ink-soft); max-width:62ch; line-height:1.6; }
+
+  .wt-scene { padding: 40px 0 64px; display:grid; grid-template-columns: 84px 1fr; gap:32px; }
+  @media(max-width:760px){ .wt-scene{ grid-template-columns:1fr; gap:16px; padding:28px 0 48px; } }
+  .wt-sn { font-size:56px; font-weight:700; letter-spacing:-0.04em; line-height:0.8; color:color-mix(in srgb,var(--accent) 28%,var(--line)); }
+  .wt-sn span { display:block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); font-weight:500; }
+  .wt-st { font-size: clamp(21px,2.4vw,28px); font-weight:700; letter-spacing:-0.025em; line-height:1.16; }
+  .wt-st em { font-style:normal; color:var(--ink-faint); font-weight:500; }
+  .wt-ss { margin:12px 0 26px; font-size:15px; color:var(--ink-soft); max-width:64ch; line-height:1.6; }
+
+  .wt-card { background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 30px -18px rgba(10,37,64,0.18); overflow:hidden; }
+  .wt-card.ac { border-left:3px solid var(--accent); }
+  .wt-ch { display:flex; justify-content:space-between; align-items:center; padding:15px 22px; border-bottom:1px solid var(--line); background:var(--bg-soft); }
+  .wt-ch .k { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-faint); }
+  .wt-ch .id { font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink); }
+  .wt-cb { padding:24px 22px; }
+  .wt-ct { font-size:18px; font-weight:700; letter-spacing:-0.02em; }
+  .wt-cm { font-size:13px; color:var(--ink-faint); margin-top:4px; }
+  table.wt-t { width:100%; border-collapse:collapse; font-size:13px; margin-top:16px; }
+  table.wt-t th { text-align:left; font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink-faint); padding:0 0 9px; border-bottom:1px solid var(--line); }
+  table.wt-t td { padding:11px 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.wt-t tr:last-child td { border-bottom:none; }
+  table.wt-t td.n { font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums; }
+  .wt-ac { font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink); }
+  .wt-ac span { display:block; font-family:'Sora',sans-serif; font-size:11.5px; color:var(--ink-faint); margin-top:3px; }
+  .wt-rows .r { display:flex; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--line); gap:14px; }
+  .wt-rows .r:last-child { border-bottom:none; }
+  .wt-rows .r.flag { background:color-mix(in srgb,var(--accent) 5%,transparent); margin:0 -22px; padding:15px 22px; border-left:3px solid var(--accent); }
+  .wt-rows .from { font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase; }
+  .wt-rows .subj { font-weight:600; font-size:14.5px; margin:4px 0 3px; letter-spacing:-0.01em; }
+  .wt-rows .det { font-size:12.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; }
+  .wt-tag { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap; }
+  .wt-tag.wait{ background:color-mix(in srgb,#f5a623 14%,transparent); color:#9a6a00; }
+  .wt-tag.ok{ background:color-mix(in srgb,#15be53 14%,transparent); color:#0a7a3a; }
+  .wt-tag.post{ background:var(--accent-deep); color:#fff; }
+  .wt-tag.draft{ background:var(--bg-soft); color:var(--ink-faint); border:1px solid var(--line); }
+  .wt-btn { background:var(--accent); color:#fff; border:none; padding:9px 15px; border-radius:999px; font-family:'Sora',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .wt-btn.g { background:#fff; color:var(--ink-faint); border:1px solid var(--line); cursor:default; }
+  .wt-prog { display:grid; grid-template-columns:repeat(3,1fr); margin-top:20px; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .wt-prog div { padding:15px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; border-right:1px solid var(--line); }
+  .wt-prog div:last-child { border-right:none; }
+  .wt-prog div .t { font-size:9.5px; color:var(--ink-faint); margin-top:5px; }
+  .wt-prog div.done { background:color-mix(in srgb,#15be53 10%,transparent); color:#0a7a3a; }
+  .wt-prog div.now { background:var(--accent); color:#fff; }
+  .wt-prog div.now .t { color:rgba(255,255,255,0.8); }
+  .wt-prog div.todo { color:var(--ink-faint); }
+  .wt-pills { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+  .wt-pill { font-family:'IBM Plex Mono',monospace; font-size:10px; padding:5px 11px; border-radius:999px; border:1px solid var(--line); color:var(--ink-soft); }
+  .wt-pill.on{ background:color-mix(in srgb,#15be53 12%,transparent); color:#0a7a3a; border-color:transparent; }
+  .wt-pill.ac2{ background:color-mix(in srgb,var(--accent) 12%,transparent); color:var(--accent); border-color:transparent; }
+  .wt-seal { margin-top:16px; padding:13px 15px; background:var(--bg-soft); border:1px dashed var(--line); border-radius:8px; }
+  .wt-seal .l { font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.09em; color:var(--ink-faint); margin-bottom:6px; }
+  .wt-seal .v { font-size:13px; color:var(--ink-soft); line-height:1.55; }
+  .wt-seal .v.code { font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink); word-break:break-all; }
+  .wt-kv { display:grid; grid-template-columns:150px 1fr; gap:11px 16px; padding:16px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); font-size:13.5px; margin-top:14px; }
+  .wt-kv dt { font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink-faint); }
+  .wt-kv dd { font-weight:600; }
+  .wt-kv dd .mn { font-family:'IBM Plex Mono',monospace; font-weight:400; color:var(--ink-faint); }
+  .wt-warn { margin:16px 0; padding:13px 15px; background:var(--bg-soft); border-radius:8px; font-size:12.5px; color:var(--ink-soft); line-height:1.6; }
+  .wt-warn b { color:var(--ink); }
+  .wt-confirm-btn { width:100%; background:var(--accent); color:#fff; border:none; padding:13px; border-radius:999px; font-family:'Sora',sans-serif; font-size:14.5px; font-weight:600; cursor:pointer; }
+  .wt-ref { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--accent); letter-spacing:0.07em; text-transform:uppercase; }
+  .wt-cf-h { font-size:20px; font-weight:700; margin:9px 0 4px; letter-spacing:-0.02em; }
+  .wt-cf-as { font-size:12.5px; color:var(--ink-faint); margin-bottom:16px; }
+  .wt-chain { margin-top:24px; }
+  .wt-chh { font-size:18px; font-weight:700; letter-spacing:-0.02em; }
+  .wt-chd { font-size:13.5px; color:var(--ink-soft); margin-top:6px; }
+  .wt-links { display:grid; grid-template-columns:repeat(5,1fr); gap:11px; margin-top:18px; }
+  @media(max-width:760px){ .wt-links{ grid-template-columns:1fr 1fr; } }
+  .wt-lk { border:1px solid var(--line); border-radius:10px; padding:16px 14px; background:#fff; transition:transform .15s, box-shadow .15s; }
+  .wt-lk:hover { transform:translateY(-3px); box-shadow:0 12px 26px -16px rgba(10,37,64,0.2); }
+  .wt-lk .n { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--accent); }
+  .wt-lk .nm { font-weight:700; font-size:14px; margin:7px 0 5px; letter-spacing:-0.01em; }
+  .wt-lk .ds { font-size:11.5px; color:var(--ink-soft); line-height:1.5; }
+  .wt-lk .va { margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--accent); }
+  .wt-uw { margin-top:24px; border:1px solid var(--line); border-radius:12px; padding:24px 22px; background:#fff; }
+  .wt-uw h4 { font-size:17px; font-weight:700; letter-spacing:-0.02em; }
+  .wt-uw .s { font-size:12.5px; color:var(--ink-faint); margin:4px 0 14px; }
+  .wt-uw p { font-size:14px; color:var(--ink-soft); line-height:1.6; }
+  .wt-uw p + p { margin-top:9px; }
+  .wt-uw strong { color:var(--ink); }
+  /* dev notes — scoped, shared toggle via #walkthrough[data-dev] */
+  .wt-dev-note { display:none; margin-top:22px; background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 16px 40px -20px rgba(10,37,64,0.5); }
+  #walkthrough[data-dev="on"] .wt-dev-note { display:block; }
+  .wt-dn-h { display:flex; align-items:center; gap:7px; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.08); }
+  .wt-dn-h .c { width:10px; height:10px; border-radius:50%; }
+  .wt-dn-h .lbl { margin-left:8px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:#7d8aa3; letter-spacing:0.05em; }
+  .wt-dn dl { margin:0; padding:18px 20px; display:grid; grid-template-columns:148px 1fr; gap:9px 18px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.6; }
+  .wt-dn dt { color:#5b6b85; text-transform:uppercase; font-size:9.5px; letter-spacing:0.07em; padding-top:2px; }
+  .wt-dn dd { margin:0; color:var(--code-ink); word-break:break-word; }
+  .wt-dn dd code { background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:4px; color:#86efac; }
+  .wt-v14 { margin:0 20px 18px; padding:12px 14px; border:1px solid rgba(99,91,255,0.3); border-radius:8px; background:rgba(99,91,255,0.08); font-family:'IBM Plex Mono',monospace; font-size:11px; color:#b9c3da; line-height:1.6; }
+  .wt-v14 b { color:#a8a4ff; }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap nav-inner">
+    <a href="#" class="logo"><span class="mark">C</span>CAST</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#primitives">Primitives</a>
+      <a href="#security">Security</a>
+      <a href="#walkthrough">Walk-through</a>
+      <a href="#docs">Docs</a>
+      <a href="#cta" class="nav-cta">Request a demo <span>→</span></a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow"><span class="dot"></span>Commercial Agreement Settlement Technology</div>
+      <h1>Both parties sign the payment <span class="grad">before money moves.</span></h1>
+      <p class="lede">CAST is a bilateral coordination protocol. Before any commercial payment settles, payer and counterparty co-author one cryptographically bound record. That record is the authorization — and it travels through your ERP, audit, lenders, and insurers as tamper-evident proof.</p>
+      <div class="hero-actions">
+        <a href="#cta" class="btn btn-primary">Request a demo <span class="arrow">→</span></a>
+        <a href="#how" class="btn btn-ghost">Read the architecture</a>
+      </div>
+    </div>
+    <div class="reveal in">
+      <div class="code-card">
+        <div class="code-top">
+          <span class="c r"></span><span class="c y"></span><span class="c g"></span>
+          <span class="file">POST /v1/work-orders/wo_8fa2/confirm</span>
+        </div>
+<pre class="code"><code><span class="t-com"># Vendor confirms via passkey — the bilateral pivot</span>
+<span class="t-punc">{</span>
+  <span class="t-key">"event"</span><span class="t-punc">:</span>        <span class="t-str">"bilateral.confirmed"</span><span class="t-punc">,</span>
+  <span class="t-key">"work_order"</span><span class="t-punc">:</span>   <span class="t-str">"wo_8fa2c1"</span><span class="t-punc">,</span>
+  <span class="t-key">"payload_hash"</span><span class="t-punc">:</span> <span class="t-str">"3a9f…e21b"</span><span class="t-punc">,</span>
+  <span class="t-key">"signature"</span><span class="t-punc">:</span> <span class="t-punc">{</span>
+    <span class="t-key">"method"</span><span class="t-punc">:</span> <span class="t-str">"webauthn-p256"</span><span class="t-punc">,</span>
+    <span class="t-key">"bound_to"</span><span class="t-punc">:</span> <span class="t-str">"payload_hash"</span><span class="t-punc">,</span>
+    <span class="t-key">"signer"</span><span class="t-punc">:</span> <span class="t-str">"agent_riverdale"</span>
+  <span class="t-punc">}</span><span class="t-punc">,</span>
+  <span class="t-key">"policy_version"</span><span class="t-punc">:</span> <span class="t-str">"POL-v4.2"</span><span class="t-punc">,</span>
+  <span class="t-key">"lineage_hash"</span><span class="t-punc">:</span> <span class="t-str">"7c0d…b48a"</span>
+<span class="t-punc">}</span>
+<span class="t-com">→ Posting blocked until signature verifies.</span>
+<span class="t-com">→ Posting carries lineage to this event. Forever.</span></code></pre>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="wrap strip-inner">
+    <span class="strip-label">The unilateral model costs</span>
+    <div class="strip-stats">
+      <div class="stat"><div class="n">$2.9B</div><div class="l">Annual U.S. BEC losses</div></div>
+      <div class="stat"><div class="n">3 days → 30 min</div><div class="l">Reconciliation, post-deployment</div></div>
+      <div class="stat"><div class="n">1 of 2</div><div class="l">Parties confirm terms today</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">Proofs the output is real</div></div>
+    </div>
+  </div>
+</div>
+
+<section class="block" id="problem">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-tag">The root cause</div>
+      <h2>Every commercial payment today is authorized unilaterally.</h2>
+      <p class="sec-sub">The payer approves an invoice internally. The vendor learns of the transaction only when — or if — money arrives. Digital tools removed checks, branches, and paper, but left the trust model untouched. A payment process where only one of two parties confirms terms before value moves is not bilateral authorization. It is a unilateral instruction with hope attached.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="how" style="padding-top:0;">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-tag">The bilateral loop</div>
+      <h2>One party proposes. Both parties confirm. Policy governs what happens next.</h2>
+      <p class="sec-sub">The AP instantiation — Confirm &amp; Pay — walks one invoice through the loop. Steps 1–5 are the entire prototype. The cryptographic chain is the product; the screens are its packaging.</p>
+    </div>
+    <div class="loop reveal">
+      <div class="step">
+        <div class="idx">01 · PROPOSE</div>
+        <h3>Invoice arrives</h3>
+        <p>Trigger conditions evaluate. First payment, bank change, threshold breach. A Proposed Event is written with policy version pinned.</p>
+        <div class="writes">writes <b>events</b> · proposed</div>
+      </div>
+      <div class="step">
+        <div class="idx">02 · SEND</div>
+        <h3>Trade Message sent</h3>
+        <p>Counterparty receives a browser link: amount, date, bank last 4, three buttons. No app. No account. State advances to sent → viewed.</p>
+        <div class="writes">appends <b>events</b> · transition</div>
+      </div>
+      <div class="step pivot">
+        <div class="idx">03 · CONFIRM</div>
+        <h3>Counterparty signs</h3>
+        <p>A passkey assertion is verified and bound to the Work Order hash. The Bilateral Event is written. Lineage hash computed from the prior chain.</p>
+        <span class="pivot-tag">The pivot</span>
+        <div class="writes">writes <b>events</b> · bilateral</div>
+      </div>
+      <div class="step">
+        <div class="idx">04 · POST</div>
+        <h3>Policy clears, posting derives</h3>
+        <p>Seven auto-approve conditions evaluate against the pinned policy. The Posting is generated as a derived output — with a non-nullable FK to the bilateral event.</p>
+        <div class="writes">writes <b>postings</b> · lineage-bound</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="primitives" style="background:var(--bg-soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-tag">Five primitives</div>
+      <h2>Everything else is a projection of these five objects.</h2>
+      <p class="sec-sub">Append-only by construction. A Posting cannot exist without a bilateral co-authorship. This is enforced at the database layer — not by the UI.</p>
+    </div>
+    <div class="prim-grid">
+      <div class="prim reveal">
+        <div class="pi">primitive.event</div>
+        <h3>Event</h3>
+        <p>An immutable record of something that happened. Proposed events are unilateral; bilateral events are co-authored by both parties.</p>
+        <div class="rule"><b>Constraint:</b> Append-only. No updates. No deletes. Ever.</div>
+      </div>
+      <div class="prim reveal">
+        <div class="pi">primitive.policy</div>
+        <h3>Policy Version</h3>
+        <p>A versioned, immutable rule set. Pinned to every event at processing time. Governs triggers, auto-approve conditions, and escalation.</p>
+        <div class="rule"><b>Constraint:</b> No retroactive modification. Prior events stay pinned.</div>
+      </div>
+      <div class="prim reveal">
+        <div class="pi">primitive.work_order</div>
+        <h3>Work Order</h3>
+        <p>The execution context for human and agent decisions. Three parallel state tracks: Bilateral, Control, Settlement — never collapsed.</p>
+        <div class="rule"><b>Constraint:</b> Every internal decision is an immutable record.</div>
+      </div>
+      <div class="prim reveal">
+        <div class="pi">primitive.posting</div>
+        <h3>Posting</h3>
+        <p>A journal-ready ledger entry, generated as the output of a completed Work Order. Carries full lineage back to the originating event.</p>
+        <div class="rule"><b>Constraint:</b> Non-nullable FK to the bilateral event.</div>
+      </div>
+      <div class="prim reveal">
+        <div class="pi">primitive.case</div>
+        <h3>Case</h3>
+        <p>A governed exception — dispute, non-response, budget breach, policy gap. Appends resolution events; never unwrites prior ones.</p>
+        <div class="rule"><b>Constraint:</b> The record of the exception is permanent.</div>
+      </div>
+      <div class="prim reveal" style="background:linear-gradient(160deg,rgba(99,91,255,0.06),#fff); border-color:rgba(99,91,255,0.25);">
+        <div class="pi" style="color:var(--accent);">lineage()</div>
+        <h3>The proof is the asset</h3>
+        <p>event → work order decisions → policy version → posting. Verification cost drops to near zero because checking a hash is structurally cheaper than reconstructing a decision chain.</p>
+        <div class="rule" style="border-color:rgba(99,91,255,0.2);"><b>The subscription fee is the cost of producing it.</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="security">
+  <div class="wrap split">
+    <div class="reveal">
+      <div class="sec-tag">Attack surface</div>
+      <h2>Unilateral fraud becomes structurally impossible.</h2>
+      <p class="sec-sub" style="margin-top:14px;">CAST eliminates the class of fraud that depends on one party acting without the other's knowledge. Collusion isn't eliminated — but it becomes documented and detectable rather than invisible.</p>
+      <ul>
+        <li><span class="ck">✓</span><span><b>Email is not the confirmation channel.</b> Owning the inbox does not produce a bilateral event — the passkey device does.</span></li>
+        <li><span class="ck">✓</span><span><b>Bank change is a hard-coded trigger.</b> Not policy-configurable. Confirmation required via passkey.</span></li>
+        <li><span class="ck">✓</span><span><b>No verbal instruction has a pathway in.</b> Payment requires a bilateral event. No exceptions.</span></li>
+        <li><span class="ck">✓</span><span><b>Rush payments increase scrutiny.</b> Override needs dual approval and a constrained reason code.</span></li>
+      </ul>
+    </div>
+    <div class="reveal">
+      <div class="atk">
+        <div class="atk-row h"><div>Attack vector</div><div>Before</div><div>After</div></div>
+        <div class="atk-row"><div class="vec">Fake invoice — external</div><div class="before">Undefended</div><div class="after">Eliminated</div></div>
+        <div class="atk-row"><div class="vec">BEC — bank-change fraud</div><div class="before">Undefended</div><div class="after">Eliminated</div></div>
+        <div class="atk-row"><div class="vec">Compromised vendor email</div><div class="before">Undefended</div><div class="after">Eliminated</div></div>
+        <div class="atk-row"><div class="vec">Verbal social engineering</div><div class="before">Fully effective</div><div class="after">Eliminated</div></div>
+        <div class="atk-row"><div class="vec">Duplicate invoice</div><div class="before">Partially caught</div><div class="after">Structural</div></div>
+        <div class="atk-row"><div class="vec">Rush-payment bypass</div><div class="before">Common failure</div><div class="after">No path</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="walkthrough">
+  <div class="wrap wt-intro">
+    <div class="sec-tag">Interactive walk-through</div>
+    <h2>One signed chain, three lenses.</h2>
+    <p>Follow a single transaction — PO-2026-0142, Acme buying $47,000 of textiles from Riverdale — from issue to confirmation to independently replayable proof. Scroll through the buyer's books, the seller's mirror, and the verifier's evidence surface. Toggle dev notes for the v1.4 API and control-plane internals.</p>
+  </div>
+
+  <div class="wt-spy">
+    <div class="wt-spy-inner">
+      <div class="wt-switch">
+        <a data-jump="wt-buyer" class="active">Buyer</a>
+        <a data-jump="wt-seller">Seller</a>
+        <a data-jump="wt-verifier">Verifier</a>
+      </div>
+      <div class="wt-dev">
+        <input type="checkbox" id="wt-devnotes">
+        <label for="wt-devnotes">Show dev notes</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BUYER ===== -->
+  <div class="wt-view buyer" id="wt-buyer">
+    <div class="wrap">
+      <div class="wt-head">
+        <div class="badge"><span class="d"></span>Buyer view · outbound PO lifecycle</div>
+        <h3>What your team issues. What your books record.</h3>
+        <div class="who">Logged in as M. Chen · Acme Apparel · 20 April 2026</div>
+        <p class="lede">Every PO you send is tracked from draft, to vendor acceptance, to the accrual that hits your GL — supported by evidence your auditor can pull up in seconds. Your workflow unchanged, your controls strengthened.</p>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">01<span>Outbound · Issue</span></div>
+        <div>
+          <div class="wt-st">Your outbound POs <em>— issued, tracked, sealed.</em></div>
+          <p class="wt-ss">Every PO your team issues flows through this board. The system stamps each PO the moment it's authorized — quantity, price, delivery date, terms — and watches for the vendor's confirmation. Nothing hits the GL until it's back.</p>
+          <div class="wt-card">
+            <div class="wt-ch"><span class="k">Outbound Purchase Orders</span><span class="id">+ New PO</span></div>
+            <div class="wt-cb">
+              <table class="wt-t">
+                <thead><tr><th>PO #</th><th>Vendor</th><th>Issued</th><th class="n">Amount</th><th>State</th></tr></thead>
+                <tbody>
+                  <tr><td class="wt-ac">PO-2026-0142</td><td>Riverdale Textiles Ltd.</td><td>20 Apr · 14:02</td><td class="n">$47,000.00</td><td><span class="wt-tag wait">Sent, awaiting</span></td></tr>
+                  <tr><td class="wt-ac">PO-2026-0141</td><td>Pacific Packaging Inc.</td><td>19 Apr · 11:30</td><td class="n">$8,250.00</td><td><span class="wt-tag ok">Confirmed</span></td></tr>
+                  <tr><td class="wt-ac">PO-2026-0140</td><td>Kestrel Hardware Co.</td><td>18 Apr · 09:15</td><td class="n">$14,800.00</td><td><span class="wt-tag post">Posted to GL</span></td></tr>
+                  <tr><td class="wt-ac">PO-2026-0139</td><td>Meridian Dye Works</td><td>17 Apr · 16:40</td><td class="n">$23,100.00</td><td><span class="wt-tag draft">Draft</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · buyer scene 01</span></div>
+            <dl class="wt-dn">
+              <dt>Primary route</dt><dd><code>GET /v1/control-items?track=outbound</code></dd>
+              <dt>New PO flow</dt><dd><code>POST /v1/events</code> → canonicalize → hash → Work Order draft</dd>
+              <dt>Row state</dt><dd>projected from <code>control_item_view.bilateral_status</code></dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4 · Compiled Control Plane:</b> the board is <code>control_item_view</code>, a refreshable projection over Work Orders — not a source of truth. <code>last_actor_mode</code> and <code>accountable_owner</code> render per row.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">02<span>Outbound · Awaiting</span></div>
+        <div>
+          <div class="wt-st">Awaiting the vendor's confirmation. <em>Your team's part is done.</em></div>
+          <p class="wt-ss">The PO is sealed and sent. Until the vendor accepts, nothing moves on your GL. You can resend, edit, or cancel — but once they confirm, the accrual is supported and posting begins automatically.</p>
+          <div class="wt-card">
+            <div class="wt-ch"><span class="k">Awaiting vendor confirmation · PO-2026-0142</span></div>
+            <div class="wt-cb">
+              <div class="wt-ct">Sent to Riverdale Textiles Ltd.</div>
+              <div class="wt-cm">J. Okafor received the confirmation link 12 minutes ago. Average confirmation time for this vendor: 3 h 40 m over the last six POs.</div>
+              <div class="wt-prog">
+                <div class="done">Issued<div class="t">14:02 UTC</div></div>
+                <div class="now">Sent &amp; waiting<div class="t">14:04 UTC</div></div>
+                <div class="todo">Vendor confirms<div class="t">—</div></div>
+              </div>
+              <div class="wt-pills"><span class="wt-pill">Resend link</span><span class="wt-pill">Edit &amp; reissue</span><span class="wt-pill">Cancel PO</span></div>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · buyer scene 02</span></div>
+            <dl class="wt-dn">
+              <dt>Route</dt><dd><code>GET /v1/control-items/{id}</code> (SSE for sig arrival)</dd>
+              <dt>State check</dt><dd>no row in <code>event_signatures</code> → "awaiting" UI</dd>
+              <dt>Cancel path</dt><dd>invalidates token; no <code>events</code> row created</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4 · Decision view:</b> allowed actions (resend / edit / cancel) come from <code>decision_view</code> with reason codes — not hardcoded in the UI.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">03<span>Outbound · Posted</span></div>
+        <div>
+          <div class="wt-st">The accrual posts <em>— supported by a confirmed PO.</em></div>
+          <p class="wt-ss">Riverdale's confirmation came in at 14:32. The system immediately posted the accrual: a debit to raw-materials inventory and a credit to your vendor payable. Every line traces back to PO-2026-0142.</p>
+          <div class="wt-card ac">
+            <div class="wt-ch"><span class="k">Acme · General Ledger · Accrual</span><span class="id">JE-2026-04-0618</span></div>
+            <div class="wt-cb">
+              <div class="wt-ct">Accrual · PO-2026-0142 (Riverdale Textiles)</div>
+              <div class="wt-cm">Posted 20 April 2026 14:32 UTC · Supported by vendor-confirmed PO</div>
+              <table class="wt-t">
+                <thead><tr><th>Dr/Cr</th><th>Account</th><th class="n">Debit</th><th class="n">Credit</th><th>Support</th></tr></thead>
+                <tbody>
+                  <tr><td>Dr</td><td class="wt-ac">acme.inventory.raw_materials<span>Organic cotton + French terry inbound</span></td><td class="n">$47,000.00</td><td class="n">—</td><td class="mono" style="font-size:11.5px">PO-0142</td></tr>
+                  <tr><td>Cr</td><td class="wt-ac">acme.vendor_payable.riverdale<span>Net-30 obligation</span></td><td class="n">—</td><td class="n">$47,000.00</td><td class="mono" style="font-size:11.5px">PO-0142</td></tr>
+                </tbody>
+              </table>
+              <div class="wt-pills"><span class="wt-pill on">● Posted to GL</span><span class="wt-pill ac2">● Vendor-confirmed</span><span class="wt-pill">Support: PO-2026-0142</span></div>
+              <div class="wt-seal"><div class="l">What this accrual is supported by</div><div class="v">Confirmed by Riverdale Textiles at 14:32 UTC today, using a verified device registered to J. Okafor. Full acceptance record retained for the life of the audit trail.</div></div>
+            </div>
+          </div>
+          <div class="wt-chain">
+            <div class="wt-chh">Your audit trail, end-to-end.</div>
+            <p class="wt-chd">Month-end close, lender reporting, board pack — same five documents, always.</p>
+            <div class="wt-links">
+              <div class="wt-lk"><div class="n">01</div><div class="nm">GL Entry</div><div class="ds">The accrual in your ledger.</div></div>
+              <div class="wt-lk"><div class="n">02</div><div class="nm">Source PO</div><div class="ds">The exact terms you authorized.</div></div>
+              <div class="wt-lk"><div class="n">03</div><div class="nm">Vendor Acceptance</div><div class="ds">Sealed against the PO.</div></div>
+              <div class="wt-lk"><div class="n">04</div><div class="nm">Device of Record</div><div class="ds">Vendor's authorized device.</div></div>
+              <div class="wt-lk"><div class="n">05</div><div class="nm">Vendor Identity</div><div class="ds">The approved vendor on file.</div></div>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · buyer scene 03</span></div>
+            <dl class="wt-dn">
+              <dt>Trigger</dt><dd><code>postings_require_signed_event</code></dd>
+              <dt>Txn</dt><dd>event + sig + postings in one commit</dd>
+              <dt>Invariant</dt><dd>NN2 + NN3 enforced at DB layer</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4 · Seven invariants:</b> Posting→Bilateral FK, Bilateral→Confirmed WO, lineage chain integrity, single active policy, settlement requires approved control, hard-coded triggers non-suppressible, events append-only.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SELLER ===== -->
+  <div class="wt-view seller" id="wt-seller">
+    <div class="wrap">
+      <div class="wt-head">
+        <div class="badge"><span class="d"></span>Seller view · inbound PO lifecycle</div>
+        <h3>What your customers send. What your AR records.</h3>
+        <div class="who">Logged in as J. Okafor · Riverdale Textiles · 20 April 2026</div>
+        <p class="lede">When a buyer's PO arrives, you review the terms, confirm them, and your AR accrues against a document both sides agreed to in writing. A cleaner inbox and a better set of receivables.</p>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">01<span>Inbound · Received</span></div>
+        <div>
+          <div class="wt-st">Your inbound POs <em>— one waiting on you.</em></div>
+          <p class="wt-ss">When a customer sends you a PO, you receive one link. You review the exact terms, then confirm. Your confirmation is the bell that makes the sale real — and the evidence your AR team, your auditor, and your customer's bank can all rely on.</p>
+          <div class="wt-card">
+            <div class="wt-ch"><span class="k">Inbound Purchase Orders</span><span class="id">1 action · 2 confirmed · 8 YTD</span></div>
+            <div class="wt-cb">
+              <div class="wt-rows">
+                <div class="r flag">
+                  <div><div class="from">From: Acme Apparel Co. · M. Chen · today 14:02</div><div class="subj">PO-2026-0142 — Supply agreement, spring production run</div><div class="det">$47,000.00 · Net-30 · Delivery 15 Jun 2026</div></div>
+                  <button class="wt-btn">Review &amp; confirm →</button>
+                </div>
+                <div class="r">
+                  <div><div class="from">From: Beacon Outfitters · T. Alvarez · 18 Apr 09:10</div><div class="subj">PO-2026-BO-088 — Heavyweight fleece, Q2 draw</div><div class="det">$31,200.00 · Net-45 · Confirmed 18 Apr 11:22</div></div>
+                  <button class="wt-btn g">Confirmed</button>
+                </div>
+                <div class="r">
+                  <div><div class="from">From: Northstar Uniforms · K. Lee · 15 Apr 15:30</div><div class="subj">PO-2026-NS-212 — Cotton twill, spring restock</div><div class="det">$18,750.00 · Net-30 · Posted against 16 Apr shipment</div></div>
+                  <button class="wt-btn g">Shipped</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · seller scene 01</span></div>
+            <dl class="wt-dn">
+              <dt>Route</dt><dd><code>GET /v1/control-items</code> — filtered by <code>counterparty_agent_id</code></dd>
+              <dt>Action item</dt><dd>PO-0142 has no <code>event_signatures</code> row → confirm enabled</dd>
+              <dt>v1 delivery</dt><dd>email/SMS confirmation URL; channel from vendor signer record</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4 · Actor attribution:</b> the confirm action records <code>performed_by_mode = counterparty</code>; the Work Order's <code>accountable_owner_id</code> stays an internal human.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">02<span>Inbound · Confirm</span></div>
+        <div>
+          <div class="wt-st">Please review and confirm. <em>Your acceptance seals the agreement.</em></div>
+          <p class="wt-ss">Confirming binds you, on behalf of Riverdale Textiles, to exactly these terms — and only these. If the buyer later changes any field, your acceptance no longer applies.</p>
+          <div class="wt-card">
+            <div class="wt-ch"><span class="k">Confirmation requested</span><span class="id">Ref: cnf_8f3k9p</span></div>
+            <div class="wt-cb" style="max-width:520px">
+              <div class="wt-ref">Confirm PO-2026-0142 from Acme Apparel Co.</div>
+              <div class="wt-cf-h">Supply agreement, spring production run</div>
+              <div class="wt-cf-as">Confirming on behalf of Riverdale Textiles Ltd. · J. Okafor, authorized rep</div>
+              <dl class="wt-kv">
+                <dt>PO number</dt><dd>PO-2026-0142</dd>
+                <dt>Buyer</dt><dd>Acme Apparel Co.</dd>
+                <dt>Total amount</dt><dd>$47,000.00</dd>
+                <dt>Terms</dt><dd>Net-30</dd>
+                <dt>Delivery date</dt><dd>15 June 2026</dd>
+                <dt>Inspection window</dt><dd>5 business days</dd>
+              </dl>
+              <div class="wt-warn">Your acceptance will be sealed against a fingerprint of every field above. If the buyer changes any field — <b>one dollar, one yard, one day</b> — the fingerprint won't match, and your acceptance no longer applies.</div>
+              <button class="wt-confirm-btn">Confirm and accept these terms</button>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · seller scene 02</span></div>
+            <dl class="wt-dn">
+              <dt>Begin</dt><dd><code>POST /confirm/:token/begin</code></dd>
+              <dt>Finish</dt><dd><code>POST /confirm/:token/finish</code> — challenge = payload_hash</dd>
+              <dt>Atomic txn</dt><dd>verify sig → insert <code>events</code> + <code>event_signatures</code> → consume token</dd>
+              <dt>Guards (NN5)</dt><dd>reject <code>fmt='none'</code>; reject UV=false</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4 · Actor attribution:</b> signature insert sets <code>performed_by_mode = counterparty</code>, <code>performed_by_role = vendor signer</code>; review_required is policy-driven.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">03<span>Inbound · Posted</span></div>
+        <div>
+          <div class="wt-st">The receivable posts <em>— same event, mirror entry.</em></div>
+          <p class="wt-ss">The moment you confirmed, your AR team saw the receivable post. Same bilateral event as Acme's accrual — your mirror image of the same agreement, on your side of the ledger.</p>
+          <div class="wt-card ac">
+            <div class="wt-ch"><span class="k">Riverdale · General Ledger · Receivable</span><span class="id">JE-2026-04-0391</span></div>
+            <div class="wt-cb">
+              <div class="wt-ct">Receivable · PO-2026-0142 (Acme Apparel)</div>
+              <div class="wt-cm">Posted 20 April 2026 14:32 UTC · Supported by customer-confirmed PO</div>
+              <table class="wt-t">
+                <thead><tr><th>Dr/Cr</th><th>Account</th><th class="n">Debit</th><th class="n">Credit</th><th>Support</th></tr></thead>
+                <tbody>
+                  <tr><td>Dr</td><td class="wt-ac">riverdale.ar.acme<span>Net-30 receivable from Acme Apparel</span></td><td class="n">$47,000.00</td><td class="n">—</td><td class="mono" style="font-size:11.5px">PO-0142</td></tr>
+                  <tr><td>Cr</td><td class="wt-ac">riverdale.revenue.deferred<span>Spring production run · delivery 15 Jun</span></td><td class="n">—</td><td class="n">$47,000.00</td><td class="mono" style="font-size:11.5px">PO-0142</td></tr>
+                </tbody>
+              </table>
+              <div class="wt-pills"><span class="wt-pill on">● Posted to GL</span><span class="wt-pill ac2">● You confirmed · 14:32 UTC</span><span class="wt-pill">Customer: Acme Apparel</span></div>
+              <div class="wt-seal"><div class="l">What this receivable is supported by</div><div class="v">Your own confirmation of PO-2026-0142, made by J. Okafor at 14:32 UTC using a device registered to Riverdale. When your bank or auditor asks why this receivable exists, the answer is this PO.</div></div>
+            </div>
+          </div>
+          <div class="wt-chain">
+            <div class="wt-chh">Your AR, supported to the bank's satisfaction.</div>
+            <p class="wt-chd">Every open receivable traces to a customer-confirmed PO. Cleaner aging, fewer disputes, stronger credit package.</p>
+            <div class="wt-links">
+              <div class="wt-lk"><div class="n">01</div><div class="nm">AR Entry</div><div class="ds">The receivable in your ledger.</div></div>
+              <div class="wt-lk"><div class="n">02</div><div class="nm">Customer PO</div><div class="ds">The exact terms you received.</div></div>
+              <div class="wt-lk"><div class="n">03</div><div class="nm">Your Acceptance</div><div class="ds">Sealed against the PO.</div></div>
+              <div class="wt-lk"><div class="n">04</div><div class="nm">Device of Record</div><div class="ds">The device you used.</div></div>
+              <div class="wt-lk"><div class="n">05</div><div class="nm">Customer Identity</div><div class="ds">The buyer on file.</div></div>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · seller scene 03</span></div>
+            <dl class="wt-dn">
+              <dt>Mirror entries</dt><dd>seller-side <code>postings</code> ×2: Dr AR, Cr Revenue — same <code>event_id</code></dd>
+              <dt>Architectural point</dt><dd>one bilateral event authorizes postings on both sides — same FK, used twice</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4:</b> both postings project into each tenant's <code>state_snapshot_view</code> — current vs. expected value, unexplained variance surfaced automatically.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VERIFIER ===== -->
+  <div class="wt-view verifier" id="wt-verifier">
+    <div class="wrap">
+      <div class="wt-head">
+        <div class="badge"><span class="d"></span>Verifier view · evidence, independently replayable</div>
+        <h3>What any third party can independently reconstruct.</h3>
+        <div class="who">Credentials: External Auditor · read-only · 20 April 2026</div>
+        <p class="lede">Given only the database rows, the committed source code, and a standard cryptographic library, any external party can reproduce the signed content byte-for-byte, verify the signature, and walk the attestation chain back to a manufacturer certificate authority.</p>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">01<span>Document · Sealed</span></div>
+        <div>
+          <div class="wt-st">The sealed document <em>— exhibit A.</em></div>
+          <p class="wt-ss">This is the purchase order as sealed evidence. A verifier in 2031 can recompute this fingerprint from the raw JSON and the pinned source code, and confirm the bytes have not changed.</p>
+          <div class="wt-card ac">
+            <div class="wt-ch"><span class="k">Sealed evidence</span><span class="id">payload_version 1</span></div>
+            <div class="wt-cb">
+              <div class="wt-ct">PO-2026-0142 · Supply agreement, spring production run</div>
+              <div class="wt-cm">Issued by agt_cea5831f9712 · recorded 20 Apr 2026 14:02:11 UTC</div>
+              <dl class="wt-kv">
+                <dt>Buyer</dt><dd>Acme Apparel Co. <span class="mn">(agt_cea5831f9712)</span></dd>
+                <dt>Seller</dt><dd>Riverdale Textiles Ltd. <span class="mn">(agt_2815bf2d3c4e)</span></dd>
+                <dt>Total obligation</dt><dd>$47,000.00 USD</dd>
+                <dt>Terms</dt><dd>Net-30, delivery 15 June 2026, 5-day inspection</dd>
+              </dl>
+              <div class="wt-seal"><div class="l">Document fingerprint</div><div class="v code">0xa7c3e9f24b81d6a0f5e7c29b4d18a6f3e0c7b5d2a4f9e1c8b6d3a5f7e9c1b4d8</div></div>
+              <div class="wt-seal"><div class="l">Canonicalizer</div><div class="v code">lib/canonicalize.ts @ v1.0.0 · sha256:44a9626a…85b6b81f2</div></div>
+              <div class="wt-seal"><div class="l">What a verifier can prove from this record alone</div><div class="v">Given the JSON payload and the pinned canonicalizer source, the fingerprint is byte-reproducible. Any change to any field — one dollar, one yard, one day — produces a different fingerprint and invalidates any signature referencing it.</div></div>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · verifier scene 01</span></div>
+            <dl class="wt-dn">
+              <dt>Source rows</dt><dd><code>events</code> + <code>schema_registry</code></dd>
+              <dt>Replay steps</dt><dd>1. checkout repo at canonicalizer_tag · 2. shasum, compare · 3. run hashPayloadV1 · 4. compare</dd>
+              <dt>No trust required</dt><dd>steps need no access to Acme, Riverdale, or CAST</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4 · Actor attribution:</b> the issuing event carries <code>actor_mode</code>, <code>actor_role</code>, <code>authority_context</code> and <code>accountable_owner_id</code> — all replayable from the same row.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">02<span>Signature · Forensic</span></div>
+        <div>
+          <div class="wt-st">The signature record <em>— exhibit B.</em></div>
+          <p class="wt-ss">Every byte a verifier needs to prove, independently, that Riverdale Textiles agreed to PO-2026-0142's exact terms at a specific moment, using a hardware-attested credential registered to them.</p>
+          <div class="wt-card ac">
+            <div class="wt-ch"><span class="k">Signature record</span><span class="id" style="color:#15be53">● Replay valid</span></div>
+            <div class="wt-cb">
+              <dl class="wt-kv" style="border-top:none;padding-top:0;margin-top:0">
+                <dt>Signer</dt><dd>agt_2815bf2d3c4e <span class="mn">(Riverdale Textiles)</span></dd>
+                <dt>Role</dt><dd>counterparty</dd>
+                <dt>Signed at</dt><dd>20 April 2026, 14:32:07.428 UTC</dd>
+                <dt>Attestation</dt><dd>packed · verified</dd>
+                <dt>User verification</dt><dd>TRUE · required</dd>
+                <dt>Algorithm</dt><dd>ES256 (ECDSA-P256-SHA256)</dd>
+              </dl>
+              <div class="wt-seal"><div class="l">Signature (DER)</div><div class="v code">0x3045022100e8b4f2a7c9d15e3b8a6f4c2d9e7b1a5f3c8d6e2a4b9f7c5d1e8a3b6f4c2d902201a7f…</div></div>
+              <div class="wt-seal"><div class="l">Bound payload</div><div class="v code">0xa7c3e9f24b81d6a0f5e7c29b4d18a6f3e0c7b5d2a4f9e1c8b6d3a5f7e9c1b4d8 (= PO-2026-0142)</div></div>
+              <div class="wt-links" style="grid-template-columns:repeat(3,1fr);margin-top:18px">
+                <div class="wt-lk"><div class="n">01</div><div class="nm">Credential</div><div class="ds">Enrolled 02 Apr 2026 by Riverdale rep</div></div>
+                <div class="wt-lk"><div class="n">02</div><div class="nm">Device attestation</div><div class="ds">Signed by manufacturer's batch CA</div></div>
+                <div class="wt-lk"><div class="n">03</div><div class="nm">Root CA</div><div class="ds">Chains to published root (FIDO MDS)</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · verifier scene 02</span></div>
+            <dl class="wt-dn">
+              <dt>Source rows</dt><dd><code>event_signatures</code> + <code>webauthn_credentials</code> + <code>agents</code></dd>
+              <dt>Replay</dt><dd>recompute sha256(authData ‖ sha256(clientDataJSON)) → ECDSA-verify → confirm challenge = payload_hash</dd>
+              <dt>No libraries</dt><dd>SHA-256, ECDSA, X.509 — all standard</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4:</b> the signature row joins <code>history_view</code> as a counterparty action — ordered alongside human, agent, and system actions for full attribution replay.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wt-scene">
+        <div class="wt-sn">03<span>Chain · Replay</span></div>
+        <div>
+          <div class="wt-st">The chain, end-to-end <em>— fully replayable.</em></div>
+          <p class="wt-ss">Given nothing but the database rows and the committed canonicalizer source, any verifier can walk this chain in five steps, with standard cryptographic primitives and no access to either counterparty or the platform operator.</p>
+          <div class="wt-chain">
+            <div class="wt-chh">What a 2031 verifier reconstructs — from raw bytes.</div>
+            <p class="wt-chd">No trust required. No account at Acme, Riverdale, or CAST. Just SHA-256, ECDSA, and X.509.</p>
+            <div class="wt-links">
+              <div class="wt-lk"><div class="n">01</div><div class="nm">Posting</div><div class="ds">FK references event. Trigger proves it cannot exist without one.</div><div class="va">→ Replay FK</div></div>
+              <div class="wt-lk"><div class="n">02</div><div class="nm">Event</div><div class="ds">Canonicalize payload, hash with version prefix, compare.</div><div class="va">→ Replay hash</div></div>
+              <div class="wt-lk"><div class="n">03</div><div class="nm">Signature</div><div class="ds">ECDSA-verify against credential key. Challenge = payload hash.</div><div class="va">→ Replay sig</div></div>
+              <div class="wt-lk"><div class="n">04</div><div class="nm">Credential</div><div class="ds">Parse attestation. Validate cert chain to manufacturer root.</div><div class="va">→ Replay attest.</div></div>
+              <div class="wt-lk"><div class="n">05</div><div class="nm">Agent</div><div class="ds">Counterparty identity row, immutable since registration.</div><div class="va">→ Confirm ID</div></div>
+            </div>
+          </div>
+          <div class="wt-uw">
+            <h4>What this chain underwrites</h4>
+            <p class="s">Why the verifier view matters, commercially.</p>
+            <p><strong>For an auditor</strong> — every GL posting has cryptographic support that cannot have been fabricated after the fact. Support documentation is produced automatically, not reconstructed at year-end.</p>
+            <p><strong>For a lender</strong> — a receivable on a borrower's balance sheet can be verified against a counterparty-confirmed PO, with hardware-attested identity. Borrowing-base diligence becomes a query, not a request.</p>
+            <p><strong>For an insurer</strong> — the event chain is an underwritable fact pattern. Loss prevention, dispute defense, and fraud investigation all rest on the same rows.</p>
+          </div>
+          <div class="wt-dev-note">
+            <div class="wt-dn-h"><span class="c" style="background:#ff5f57"></span><span class="c" style="background:#febc2e"></span><span class="c" style="background:#28c840"></span><span class="lbl">dev · verifier scene 03</span></div>
+            <dl class="wt-dn">
+              <dt>Source</dt><dd>all five tables + <code>schema_registry</code></dd>
+              <dt>Primitives</dt><dd>SHA-256, ECDSA-P256, X.509 — no proprietary verifier</dd>
+              <dt>What Layer 2 sells</dt><dd>hosted replay API: pass/fail per event_id + tamper-evident timestamp</dd>
+            </dl>
+            <div class="wt-v14"><b>v1.4 · Control-plane endpoints:</b> <code>GET /v1/control-items/{id}/timeline</code>, <code>/invariants</code>, <code>/history</code> expose the replay surface; <code>POST /evaluate</code> recompiles invariant results. Projections are replayable, never the source of truth.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="docs" style="background:var(--bg-soft); border-top:1px solid var(--line);">
+  <div class="wrap split">
+    <div class="reveal">
+      <div class="sec-tag">Vertical-agnostic by design</div>
+      <h2>AP proves the architecture. Every other vertical is configuration.</h2>
+      <p class="sec-sub" style="margin-top:14px;">The four layers don't change between use cases. Only event types, policy rules, and Work Order structures do. CAST sits alongside your ERP — not in place of it — and produces posting-ready exports with the lineage hash in the memo field.</p>
+      <ul>
+        <li><span class="ck">→</span><span><b>GPU compute financing</b> — instrumentation co-authorship</span></li>
+        <li><span class="ck">→</span><span><b>Institutional grants</b> — milestone confirmation as bilateral event</span></li>
+        <li><span class="ck">→</span><span><b>Intercompany transfers</b> — shared event eliminates month-end recon</span></li>
+        <li><span class="ck">→</span><span><b>PO &amp; trade finance</b> — advance rate improves on a verified asset</span></li>
+      </ul>
+    </div>
+    <div class="reveal">
+      <div class="code-card">
+        <div class="code-top">
+          <span class="c r"></span><span class="c y"></span><span class="c g"></span>
+          <span class="file">verify.ts — independent replay</span>
+        </div>
+<pre class="code"><code><span class="t-com">// Any third party, no counterparty contact</span>
+<span class="t-key">const</span> ok <span class="t-punc">=</span> <span class="t-key">await</span> <span class="t-fn">replay</span><span class="t-punc">(</span>eventId<span class="t-punc">)</span><span class="t-punc">;</span>
+
+<span class="t-com">// Standard libs only — no proprietary verifier</span>
+<span class="t-punc">-</span> SHA<span class="t-num">256</span><span class="t-punc">(</span>canonicalize<span class="t-punc">(</span>payload<span class="t-punc">,</span> v1<span class="t-punc">))</span>
+<span class="t-punc">-</span> ECDSA<span class="t-punc">-</span>P256 signature check
+<span class="t-punc">-</span> X.<span class="t-num">509</span> chain validation
+
+<span class="t-key">return</span> <span class="t-punc">{</span>
+  <span class="t-key">valid</span><span class="t-punc">:</span> ok<span class="t-punc">,</span>
+  <span class="t-key">proves</span><span class="t-punc">:</span> <span class="t-str">"both parties confirmed"</span><span class="t-punc">,</span>
+  <span class="t-key">at</span><span class="t-punc">:</span> <span class="t-str">"signed timestamp"</span><span class="t-punc">,</span>
+  <span class="t-key">unmodified_since</span><span class="t-punc">:</span> <span class="t-key">true</span>
+<span class="t-punc">}</span><span class="t-punc">;</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="cta">
+  <div class="wrap">
+    <div class="cta-block reveal">
+      <h2>The proof is produced once, at transaction time.</h2>
+      <p>It travels with the payment through every downstream system. That's what makes a transaction insurable, financeable, and survivable in audit.</p>
+      <div class="cta-actions">
+        <a href="#" class="btn btn-primary">Request a demo <span class="arrow">→</span></a>
+        <a href="#" class="btn btn-ghost">Read the system design</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo"><span class="mark">C</span>CAST</a>
+        <p>Commercial Agreement Settlement Technology. A bilateral coordination protocol for commercial payments and financial control.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h4>Product</h4>
+          <a href="#how">Confirm &amp; Pay</a>
+          <a href="#primitives">Primitives</a>
+          <a href="#security">Security model</a>
+          <a href="#docs">Verticals</a>
+        </div>
+        <div class="foot-col">
+          <h4>Developers</h4>
+          <a href="#">API reference</a>
+          <a href="#">Replay &amp; verify</a>
+          <a href="#">Canonicalization</a>
+          <a href="#">Changelog</a>
+        </div>
+        <div class="foot-col">
+          <h4>Company</h4>
+          <a href="#">System design</a>
+          <a href="#">Security</a>
+          <a href="#cta">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>© 2026 Digital Finance HQ · CAST v1.4</span>
+      <span class="mono">Append-only · No updates · No deletes · Ever</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8));
+  const io = new IntersectionObserver((es) => {
+    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ---- walk-through scroll-spy + jump + dev notes ---- */
+  (function () {
+    const wt = document.getElementById('walkthrough');
+    if (!wt) return;
+    const pills = [...wt.querySelectorAll('.wt-switch a')];
+    const views = ['wt-buyer','wt-seller','wt-verifier'].map(id => document.getElementById(id));
+
+    pills.forEach(p => p.addEventListener('click', () => {
+      const t = document.getElementById(p.dataset.jump);
+      // offset for sticky nav (64) + spy bar (54)
+      const y = t.getBoundingClientRect().top + scrollY - 120;
+      scrollTo({ top: y, behavior: 'smooth' });
+    }));
+
+    const spy = new IntersectionObserver(es => {
+      es.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id;
+          pills.forEach(p => p.classList.toggle('active', p.dataset.jump === id));
+        }
+      });
+    }, { rootMargin: '-130px 0px -55% 0px', threshold: 0 });
+    views.forEach(v => spy.observe(v));
+
+    wt.setAttribute('data-dev', 'off');
+    document.getElementById('wt-devnotes').addEventListener('change', e => {
+      wt.setAttribute('data-dev', e.target.checked ? 'on' : 'off');
+    });
+  })();
+</script>
+
+</body>
+</html>
