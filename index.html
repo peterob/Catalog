@@ -471,9 +471,9 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
   <div class="hero-bg"></div>
   <div class="wrap hero-grid">
     <div>
-      <div class="eyebrow"><span class="dot"></span>Commercial Agreement Settlement Technology</div>
-      <h1>Both parties sign the payment <span class="grad">before money moves.</span></h1>
-      <p class="lede">CAST is a bilateral coordination protocol. Before any commercial payment settles, payer and counterparty co-author one cryptographically bound record. That record is the authorization — and it travels through your ERP, audit, lenders, and insurers as tamper-evident proof.</p>
+      <div class="eyebrow"><span class="dot"></span>High-Risk AP Control</div>
+      <h1>Require mutual authorization <span class="grad">before payments move.</span></h1>
+      <p class="lede">CAST adds a mutual authorization step before payments are released. Vendors confirm exact details via a secure link. This creates a clear, verifiable record for both sides.</p>
       <div class="hero-actions">
         <a href="#cta" class="btn btn-primary">Request access <span class="arrow">→</span></a>
         <a href="#how" class="btn btn-ghost">Read the architecture</a>
@@ -521,8 +521,9 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="sec-tag">The root cause</div>
-      <h2>Every commercial payment today is authorized unilaterally.</h2>
-      <p class="sec-sub">The payer approves an invoice internally. The vendor learns of the transaction only when — or if — money arrives. Digital tools removed checks, branches, and paper, but left the trust model untouched. A payment process where only one of two parties confirms terms before value moves is not bilateral authorization. It is a unilateral instruction with hope attached.</p>
+      <h2>Today’s AP process is one-sided by design.</h2>
+      <p class="sec-sub">Your team approves an invoice internally. The vendor only learns the final details when — or if — the money arrives.</p>
+      <p class="sec-sub">This gap creates risk because the vendor has no formal role to confirm details before funds leave. Attackers can change bank details or submit fake invoices without the real vendor knowing. Rush payments and high-value transfers increase exposure — urgency leads teams to skip checks exactly when the stakes are highest.</p>
     </div>
   </div>
 </section>
@@ -530,35 +531,31 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
 <section class="block" id="how" style="padding-top:0;">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="sec-tag">The bilateral loop</div>
+      <div class="sec-tag">Mutual Authorization</div>
       <h2>One party proposes. Both parties confirm. Policy governs what happens next.</h2>
       <p class="sec-sub">The AP instantiation — Confirm &amp; Pay — walks one invoice through the loop. Steps 1–5 are the entire prototype. The cryptographic chain is the product; the screens are its packaging.</p>
     </div>
     <div class="loop reveal">
       <div class="step">
         <div class="idx">01 · PROPOSE</div>
-        <h3>Invoice arrives</h3>
-        <p>Trigger conditions evaluate. First payment, bank change, threshold breach. A Proposed Event is written with policy version pinned.</p>
-        <div class="writes">writes <b>events</b> · proposed</div>
+        <h3>High-risk payment identified</h3>
+        <p>Your rules flag a payment that needs mutual authorization (first vendor, bank change, high value, rush, etc.).</p>
       </div>
       <div class="step">
         <div class="idx">02 · SEND</div>
-        <h3>Trade Message sent</h3>
-        <p>Counterparty receives a browser link: amount, date, bank last 4, three buttons. No app. No account. State advances to sent → viewed.</p>
-        <div class="writes">appends <b>events</b> · transition</div>
+        <h3>Secure link sent to vendor</h3>
+        <p>The vendor receives a simple browser link showing the amount, invoice, date, and bank details. No login or app required.</p>
       </div>
       <div class="step pivot">
-        <div class="idx">03 · CONFIRM</div>
-        <h3>Counterparty signs</h3>
-        <p>A passkey assertion is verified and bound to the Work Order hash. The Bilateral Event is written. Lineage hash computed from the prior chain.</p>
+        <div class="idx">03 · AUTHORIZE</div>
+        <h3>Vendor provides mutual authorization</h3>
+        <p>The vendor reviews and authorizes the payment details (or requests a change / disputes). This creates the binding authorization record.</p>
         <span class="pivot-tag">The pivot</span>
-        <div class="writes">writes <b>events</b> · bilateral</div>
       </div>
       <div class="step">
-        <div class="idx">04 · POST</div>
-        <h3>Policy clears, posting derives</h3>
-        <p>Seven auto-approve conditions evaluate against the pinned policy. The Posting is generated as a derived output — with a non-nullable FK to the bilateral event.</p>
-        <div class="writes">writes <b>postings</b> · lineage-bound</div>
+        <div class="idx">04 · RELEASE</div>
+        <h3>Payment proceeds with proof</h3>
+        <p>Only after mutual authorization does the payment release. A clear, verifiable record is created automatically.</p>
       </div>
     </div>
   </div>
@@ -569,15 +566,15 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
     <div class="sec-head reveal">
       <div class="sec-tag">Five primitives</div>
       <h2>Everything else is a projection of these five objects.</h2>
-      <p class="sec-sub">Append-only by construction. A Posting cannot exist without a bilateral co-authorship. This is enforced at the database layer — not by the UI.</p>
+      <p class="sec-sub">Append-only by design. Mutual authorization is enforced before any high-risk posting. This creates verifiable proof without added complexity.</p>
     </div>
     <div class="prim-grid">
-      <div class="prim reveal"><div class="pi">primitive.event</div><h3>Event</h3><p>An immutable record of something that happened. Proposed events are unilateral; bilateral events are co-authored by both parties.</p><div class="rule"><b>Constraint:</b> Append-only. No updates. No deletes. Ever.</div></div>
-      <div class="prim reveal"><div class="pi">primitive.policy</div><h3>Policy Version</h3><p>A versioned, immutable rule set. Pinned to every event at processing time. Governs triggers, auto-approve conditions, and escalation.</p><div class="rule"><b>Constraint:</b> No retroactive modification. Prior events stay pinned.</div></div>
-      <div class="prim reveal"><div class="pi">primitive.work_order</div><h3>Work Order</h3><p>The execution context for human and agent decisions. Three parallel state tracks: Bilateral, Control, Settlement — never collapsed.</p><div class="rule"><b>Constraint:</b> Every internal decision is an immutable record.</div></div>
-      <div class="prim reveal"><div class="pi">primitive.posting</div><h3>Posting</h3><p>A journal-ready ledger entry, generated as the output of a completed Work Order. Carries full lineage back to the originating event.</p><div class="rule"><b>Constraint:</b> Non-nullable FK to the bilateral event.</div></div>
-      <div class="prim reveal"><div class="pi">primitive.case</div><h3>Case</h3><p>A governed exception — dispute, non-response, budget breach, policy gap. Appends resolution events; never unwrites prior ones.</p><div class="rule"><b>Constraint:</b> The record of the exception is permanent.</div></div>
-      <div class="prim reveal" style="background:linear-gradient(160deg,rgba(99,91,255,0.06),#fff); border-color:rgba(99,91,255,0.25);"><div class="pi" style="color:var(--accent);">lineage()</div><h3>The proof is the asset</h3><p>event → work order decisions → policy version → posting. Verification cost drops to near zero because checking a hash is structurally cheaper than reconstructing a decision chain.</p><div class="rule" style="border-color:rgba(99,91,255,0.2);"><b>The subscription fee is the cost of producing it.</b></div></div>
+      <div class="prim reveal"><div class="pi">primitive.event</div><h3>Event</h3><p>An immutable record of something that happened. Proposed events come from one side; mutual authorization events require confirmation from both parties.</p><div class="rule"><b>Constraint:</b> Append-only. No updates. No deletes. Ever.</div></div>
+      <div class="prim reveal"><div class="pi">primitive.policy</div><h3>Policy Version</h3><p>A versioned, immutable rule set. Pinned to every event at the time it is processed. It governs triggers, auto-approve conditions, and how exceptions are handled.</p><div class="rule"><b>Constraint:</b> Policies cannot be changed retroactively. Earlier events keep the policy version that applied when they occurred.</div></div>
+      <div class="prim reveal"><div class="pi">primitive.work_order</div><h3>Work Order</h3><p>The container that holds the full context and decisions for a payment. It tracks three parallel states (Authorization, Control, and Settlement) without collapsing them.</p><div class="rule"><b>Constraint:</b> Every decision is recorded as an immutable event.</div></div>
+      <div class="prim reveal"><div class="pi">primitive.posting</div><h3>Posting</h3><p>A journal-ready ledger entry created only after mutual authorization is complete. It carries the full history back to the original event.</p><div class="rule"><b>Constraint:</b> A posting cannot exist without a completed mutual authorization record.</div></div>
+      <div class="prim reveal"><div class="pi">primitive.case</div><h3>Case</h3><p>A governed exception (dispute, non-response, budget breach, policy gap, etc.). Resolution events are added, but prior events are never changed or deleted.</p><div class="rule"><b>Constraint:</b> The record of the exception is permanent.</div></div>
+      <div class="prim reveal" style="background:linear-gradient(160deg,rgba(99,91,255,0.06),#fff); border-color:rgba(99,91,255,0.25);"><div class="pi" style="color:var(--accent);">lineage()</div><h3>The proof is the asset</h3><p>Every posting is traceable back through the events, decisions, and policy version that created it. Because the chain is immutable, verifying a payment’s history becomes fast and reliable.</p><div class="rule" style="border-color:rgba(99,91,255,0.2);"><b>The subscription fee is the cost of producing this verifiable record.</b></div></div>
     </div>
   </div>
 </section>
@@ -616,10 +613,11 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
       <h2>AP proves the architecture. Every other vertical is configuration.</h2>
       <p class="sec-sub" style="margin-top:14px;">The four layers don't change between use cases. Only event types, policy rules, and Work Order structures do. CAST sits alongside your ERP — not in place of it — and produces posting-ready exports with the lineage hash in the memo field.</p>
       <ul>
-        <li><span class="ck">→</span><span><b>GPU compute financing</b> — instrumentation co-authorship</span></li>
-        <li><span class="ck">→</span><span><b>Institutional grants</b> — milestone confirmation as bilateral event</span></li>
-        <li><span class="ck">→</span><span><b>Intercompany transfers</b> — shared event eliminates month-end recon</span></li>
-        <li><span class="ck">→</span><span><b>PO &amp; trade finance</b> — advance rate improves on a verified asset</span></li>
+        <li><span class="ck">→</span><span><b>BEC fraud prevention</b> — Highest risk reduction for CFOs and controllers</span></li>
+        <li><span class="ck">→</span><span><b>Port dispute rescue</b> — Freight forwarders and importers</span></li>
+        <li><span class="ck">→</span><span><b>Audit remediation</b> — Public companies and PE-backed firms</span></li>
+        <li><span class="ck">→</span><span><b>Lender-mandated controls</b> — ABL lenders and factors</span></li>
+        <li><span class="ck">→</span><span><b>Intercompany transfers</b> — Shared authorization eliminates month-end reconciliation</span></li>
       </ul>
     </div>
     <div class="reveal">
@@ -665,7 +663,7 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
     <div class="foot-grid">
       <div class="foot-brand">
         <div class="logo" onclick="switchTab('main')"><span class="mark">C</span>CAST</div>
-        <p>Commercial Agreement Settlement Technology. A bilateral coordination protocol for commercial payments and financial control.</p>
+        <p>CAST — Mutual authorization for high-risk AP payments. Simple, verifiable control alongside your existing systems.</p>
       </div>
       <div class="foot-cols">
         <div class="foot-col">
@@ -710,9 +708,9 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
     <section class="cp-hero">
       <div class="container cp-hero-grid">
         <div>
-          <div class="cp-kicker">Commercial Agreement Settlement Technology</div>
+          <div class="cp-kicker">Mutual Authorization</div>
           <h1>Confirm vendor payments before they move.</h1>
-          <p class="cp-lead">CAST adds a bilateral gate to high-risk AP payments. Before release, the vendor confirms the amount, invoice, payment date, and destination-account last four.</p>
+          <p class="cp-lead">CAST adds a mutual authorization step to AP payments. Vendors confirm exact details via a secure link before funds are released.</p>
           <div class="cp-actions">
             <a class="cp-btn cp-btn-primary" href="mailto:peter@digitalfinancehq.com?subject=CAST%20Confirm%20%26%20Pay%20demo">Request a demo →</a>
             <a class="cp-btn cp-btn-light" href="#cp-how">See how it works</a>
@@ -767,7 +765,7 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
       <div class="container two-col">
         <div>
           <div class="cp-kicker">The root cause</div>
-          <h2 class="section-title">AP today is unilateral.</h2>
+          <h2 class="section-title">AP today is one-sided.</h2>
         </div>
         <div class="section-copy">
           <p>The payer approves an invoice internally. The vendor learns of the transaction only when money arrives, when it does not arrive, or when something is already wrong.</p>
@@ -780,16 +778,16 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
       <div class="container">
         <div class="section-head">
           <div>
-            <div class="cp-kicker">The bilateral loop</div>
+            <div class="cp-kicker">Mutual Authorization Loop</div>
             <h2 class="section-title">One party proposes. The vendor confirms. Policy governs release.</h2>
           </div>
           <p>Confirm &amp; Pay is a pre-release AP control. It does not replace the ERP, create seller-side ledgers, or require vendors to adopt a new system.</p>
         </div>
         <div class="loop-grid">
-          <article class="cp-card loop-card"><div class="step-top"><span class="step-label">01 · Propose</span><span class="icon-box">□</span></div><h3>Payment intent created</h3><p>A high-risk invoice or payment request enters the queue. Policy version and payment details are snapshotted.</p></article>
-          <article class="cp-card loop-card"><div class="step-top"><span class="step-label">02 · Send</span><span class="icon-box">↗</span></div><h3>Trade Message sent</h3><p>Vendor receives one browser link: amount, invoice, payment date, bank last four, and deadline.</p></article>
-          <article class="cp-card loop-card active"><div class="step-top"><span class="step-label">03 · Confirm</span><span class="icon-box">✓</span></div><h3>Vendor confirms</h3><p>The vendor confirms, requests a change, or disputes. Confirmation is bound to the specific payment record.</p><span class="badge">Bilateral gate</span></article>
-          <article class="cp-card loop-card"><div class="step-top"><span class="step-label">04 · Release</span><span class="icon-box">→</span></div><h3>Payment can proceed</h3><p>Covered payments remain blocked until the bilateral event exists. The proof record is retained.</p></article>
+          <article class="cp-card loop-card"><div class="step-top"><span class="step-label">01 · Propose</span><span class="icon-box">□</span></div><h3>High-risk payment identified</h3><p>Your rules flag a payment that needs mutual authorization (first vendor, bank change, high value, rush, etc.).</p></article>
+          <article class="cp-card loop-card"><div class="step-top"><span class="step-label">02 · Send</span><span class="icon-box">↗</span></div><h3>Secure link sent to vendor</h3><p>The vendor receives a simple browser link showing the amount, invoice, date, and bank details. No login or app required.</p></article>
+          <article class="cp-card loop-card active"><div class="step-top"><span class="step-label">03 · Authorize</span><span class="icon-box">✓</span></div><h3>Vendor provides mutual authorization</h3><p>The vendor reviews and authorizes the payment details (or requests a change / disputes). This creates the binding authorization record.</p></article>
+          <article class="cp-card loop-card"><div class="step-top"><span class="step-label">04 · Release</span><span class="icon-box">→</span></div><h3>Payment proceeds with proof</h3><p>Only after mutual authorization does the payment release. A clear, verifiable record is created automatically.</p></article>
         </div>
       </div>
     </section>
@@ -841,7 +839,7 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
             <div class="cp-kicker">Covered AP controls</div>
             <h2 class="section-title">Start where payment risk is concentrated.</h2>
           </div>
-          <p>Confirm &amp; Pay focuses on the flows where unilateral instructions create the most damage.</p>
+          <p>Confirm &amp; Pay focuses on the payments where one-sided approval creates the most risk.</p>
         </div>
         <div class="trigger-grid">
           <article class="cp-card trigger-card"><div class="icon-box">U</div><h3>First payment to a vendor</h3><p>A new vendor relationship should not receive funds without counterparty confirmation of the destination details.</p></article>
@@ -895,7 +893,7 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
               </div>
               <div class="wt-panel hidden" id="panel-proof">
                 <div class="panel-head">
-                  <div><div class="panel-eyebrow">Proof view · retained evidence</div><h3 class="panel-title">The output is a bilateral payment-confirmation record.</h3><p class="panel-body">CAST proves the vendor confirmed these payment terms for this specific payment record at this timestamp. It does not claim the invoice is inherently real or eliminate collusion.</p></div>
+                  <div><div class="panel-eyebrow">Proof view · retained evidence</div><h3 class="panel-title">The output is a clear authorization record.</h3><p class="panel-body">CAST proves the vendor confirmed these exact payment details at this time.</p></div>
                   <span class="panel-badge">retained</span>
                 </div>
                 <div class="data-table">
@@ -915,7 +913,7 @@ footer.cp-footer { border-top: 1px solid var(--line); background: rgba(255,255,2
       <div class="container two-col" style="align-items:center;">
         <div>
           <div class="cp-kicker">Proof record</div>
-          <h2 class="section-title">Every covered payment leaves behind a bilateral record.</h2>
+          <h2 class="section-title">Every authorized payment leaves behind a clear record.</h2>
           <p class="section-copy">Confirm &amp; Pay records who confirmed, what they confirmed, when they confirmed it, which policy governed the release, and which payment record the confirmation was bound to.</p>
           <div class="check-list">
             <div class="check">Vendor confirmation before payment release</div>
